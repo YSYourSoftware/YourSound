@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This file was created by NSISDialogDesigner 1.6.0.0
+https://coolsoft.altervista.org/nsisdialogdesigner
+Do not edit manually!
+-->
+<Dialog Name="Welcome" Font="Fira Sans, 8.25pt" Title="Installing YourSound..." Subtitle="Welcome">
+  <HLine Name="HLine1" Location="0, 32" Size="450, 2" />
+  <Bitmap Name="Bitmap1" Location="15, 125" Size="90, 90" ImageFilename=".\icon-90.bmp" Stretched="True" TabIndex="1" />
+  <Label Name="Label2" Location="5, 40" Size="440, 100" Text="Welcome to the YourSound Installer!&#xD;&#xA;&#xD;&#xA;You will now be led through the installation process where you can change settings such as which components you would like to install.&#xD;&#xA;&#xD;&#xA;You can always change your settings later." Font="Fira Sans, 8.25pt" TabIndex="2" />
+  <Label Name="Label1" Location="0, 0" Size="450, 32" Text="YourSound Installer" Font="Fira Sans, 20pt, style=Bold" TabIndex="3" />
+</Dialog>

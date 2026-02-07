@@ -1,0 +1,6 @@
+[submodule "core/lib/sol2"]
+	path = core/lib/sol2
+	url = https://github.com/ThePhD/sol2.git
+[submodule "plugin/lib/JUCE"]
+	path = plugin/lib/JUCE
+	url = https://github.com/juce-framework/JUCE.git

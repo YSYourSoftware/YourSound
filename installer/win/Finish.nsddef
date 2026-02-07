@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This file was created by NSISDialogDesigner 1.6.0.0
+https://coolsoft.altervista.org/nsisdialogdesigner
+Do not edit manually!
+-->
+<Dialog Name="Finish" Font="Fira Sans, 8.25pt" Title=" Installation Complete" Subtitle=" ">
+  <HLine Name="HLine1" Location="0, 32" Size="450, 2" />
+  <CheckBox Name="OpenApp" Location="111, 125" Size="120, 90" Text="Open YourSound" TabIndex="1" />
+  <Bitmap Name="Bitmap1" Location="15, 125" Size="90, 90" ImageFilename=".\icon-90.bmp" Stretched="True" TabIndex="2" />
+  <Label Name="Label2" Location="5, 40" Size="440, 100" Text="The installation of YourSound has completed successfully.&#xD;&#xA;&#xD;&#xA;You may now use the software and delete this installer.&#xD;&#xA;&#xD;&#xA;Thank you for choosing YourSound!" TabIndex="3" />
+  <Label Name="Label1" Location="0, 0" Size="450, 32" Text="Installation Complete" Font="Fira Sans, 20pt, style=Bold" TabIndex="4" />
+</Dialog>
