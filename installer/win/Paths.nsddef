@@ -4,15 +4,14 @@ This file was created by NSISDialogDesigner 1.6.0.0
 https://coolsoft.altervista.org/nsisdialogdesigner
 Do not edit manually!
 -->
-<Dialog Name="Paths" Font="Fira Sans, 8.25pt" Title="Installing YourSound..." Subtitle="Installation Directories">
+<Dialog Name="Paths" Font="Fira Sans, 8.25pt" Title="Installing YourSound..." Subtitle="Installation Directories" GenerateShowFunction="False">
   <HLine Name="HLine1" Location="0, 32" Size="450, 2" />
-  <DirRequest Name="LIBLocationInput" Location="10, 196" Size="430, 13" Text="C:\Program Files\YourSoftware\YourSound\Libraries" TabIndex="1" />
-  <DirRequest Name="AULocationInput" Location="10, 150" Size="430, 13" TabIndex="2" />
+  <Label Name="Label2" Location="5, 175" Size="440, 44" Text="Ensure that the Library Install Location has lots of remaining space." TabIndex="1" />
+  <DirRequest Name="LIBLocationInput" Location="10, 150" Size="430, 13" Text="C:\Program Files\YourSoftware\YourSound\Libraries" TabIndex="2" />
   <DirRequest Name="VST3LocationInput" Location="10, 104" Size="430, 13" Text="C:\Program Files\Common Files\VST3" TabIndex="3" />
   <DirRequest Name="EXELocationInput" Location="10, 58" Size="430, 13" Text="C:\Program Files\YourSoftware\YourSound" TabIndex="4" />
   <Label Name="Label1" Location="0, 0" Size="450, 32" Text="Installation Directories" Font="Fira Sans, 20pt, style=Bold" TabIndex="5" />
   <GroupBox Name="GroupBox2" Location="5, 86" Size="440, 40" Text="VST3 Install Location" TabIndex="6" />
   <GroupBox Name="GroupBox1" Location="5, 40" Size="440, 40" Text="Core Install Location" TabIndex="7" />
-  <GroupBox Name="GroupBox3" Location="5, 132" Size="440, 40" Text="AU Install Location" TabIndex="8" />
-  <GroupBox Name="GroupBox4" Location="5, 178" Size="440, 40" Text="Library Install Location" TabIndex="9" />
+  <GroupBox Name="GroupBox4" Location="5, 132" Size="440, 40" Text="Library Install Location" TabIndex="8" />
 </Dialog>

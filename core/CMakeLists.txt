@@ -1,15 +1,16 @@
-option(YS_BUILD_SHARED "Build YourSound as a shared library" OFF)
+add_library(YourSound SHARED)
 
-if(YS_BUILD_SHARED)
-	add_library(YourSound SHARED)
-else()
-	add_library(YourSound STATIC)
-endif()
+set(YSBP_YS_ROOT ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
+include(YourSoundBinaryPlayer.cmake)
 
 add_subdirectory(src)
-add_subdirectory(lib)
 
-target_include_directories(YourSound 
-	PUBLIC include
-	PRIVATE src
+target_compile_definitions(YourSound PRIVATE YS_IN_CORE_BUILD)
+target_compile_features(YourSound PUBLIC cxx_std_23)
+target_include_directories(YourSound PUBLIC include ../lib/SArc/include)
+target_link_libraries(YourSound PRIVATE
+	nlohmann_json
+	ImGui_Player
+	PUBLIC
+	SArc
 )

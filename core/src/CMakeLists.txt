@@ -1,3 +1,10 @@
 target_sources(YourSound PRIVATE
-	"engines/script/LuaIntegration.cpp"
+	IntegratedPlayers/BasicOSCPlayer.cpp
+	IntegratedPlayers/ModLFO.cpp
+
+	BinPlayerInterface.cpp
+	Config.cpp
+	Player.cpp
+	Rack.cpp
+	Resource.cpp
 )

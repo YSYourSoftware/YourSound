@@ -1,6 +1,31 @@
-[submodule "core/lib/sol2"]
-	path = core/lib/sol2
-	url = https://github.com/ThePhD/sol2.git
-[submodule "plugin/lib/JUCE"]
-	path = plugin/lib/JUCE
+[submodule "lib/imgui_juce"]
+	path = lib/imgui_juce
+	url = https://github.com/Krasjet/imgui_juce.git
+[submodule "lib/JUCE"]
+	path = lib/JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "lib/SDL"]
+	path = lib/SDL
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "lib/ImGui"]
+	path = lib/ImGui
+	url = https://github.com/ocornut/imgui.git
+	branch = docking
+[submodule "lib/SArc"]
+	path = lib/SArc
+	url = https://github.com/YSYourSoftware/SArc.git
+[submodule "lib/json"]
+	path = lib/json
+	url = https://github.com/nlohmann/json.git
+[submodule "factory/binary/lib/TinySoundFont"]
+	path = factory/binary/lib/TinySoundFont
+	url = https://github.com/schellingb/TinySoundFont.git
+[submodule "lib/utfcpp"]
+	path = lib/utfcpp
+	url = https://github.com/nemtrif/utfcpp.git
+[submodule "factory/binary/lib/imgui-knobs"]
+	path = lib/imgui-knobs
+	url = https://github.com/altschuler/imgui-knobs.git
+[submodule "lib/imgui_club"]
+	path = lib/imgui_club
+	url = https://github.com/ocornut/imgui_club.git

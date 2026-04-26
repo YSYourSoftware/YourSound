@@ -1,0 +1,7 @@
+{
+	"all": [
+		{"file": "binplayers-x86-64.dll",   "satisfies": {"os": "windows", "architecture": "x86-64"}},
+		{"file": "binplayers-x86-64.so",    "satisfies": {"os": "linux",   "architecture": "x86-64"}},
+		{"file": "binplayers-x86-64.dylib", "satisfies": {"os": "macos",   "architecture": "x86-64"}}
+	]
+}

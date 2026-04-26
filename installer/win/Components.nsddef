@@ -4,15 +4,14 @@ This file was created by NSISDialogDesigner 1.6.0.0
 https://coolsoft.altervista.org/nsisdialogdesigner
 Do not edit manually!
 -->
-<Dialog Name="Components" Font="Fira Sans, 8.25pt" Title="Installing YourSound..." Subtitle="Component Selection">
+<Dialog Name="Components" Font="Fira Sans, 8.25pt" Title="Installing YourSound..." Subtitle="Component Selection" GenerateShowFunction="False">
   <HLine Name="HLine1" Location="0, 32" Size="450, 2" />
-  <Label Name="SizeLabel" Location="298, 52" Size="136, 153" Text="Space Required:&#xD;&#xA;0 KB" Font="Fira Sans, 8.25pt" TabIndex="1" />
-  <GroupBox Name="ComponentBox" Location="10, 44" Size="275, 161" Text="Components" Font="Fira Sans, 8.25pt" TabIndex="2">
-    <CheckBox Name="SecFactory" Location="5, 75" Size="265, 15" Text="Factory Library" Checked="True" TabIndex="0" onClick="ComponentsCheckboxChange" />
-    <CheckBox Name="SecAU" Location="5, 60" Size="265, 15" Text="AU Plugin" TabIndex="1" onClick="ComponentsCheckboxChange" />
-    <CheckBox Name="SecVST3" Location="5, 45" Size="265, 15" Text="VST3 Plugin" Checked="True" TabIndex="2" onClick="ComponentsCheckboxChange" />
-    <CheckBox Name="SecStartMenu" Location="5, 30" Size="265, 15" Text="Start Menu Shortcut" Checked="True" TabIndex="3" onClick="ComponentsCheckboxChange" />
-    <CheckBox Name="SecCore" Location="5, 15" Size="265, 15" Text="Core Components" Checked="True" TabIndex="4" Enabled="False" onClick="ComponentsCheckboxChange" />
+  <Label Name="SizeLabel" Location="298, 52" Size="136, 153" Text="Space Required:&#xD;&#xA;0 KB" TabIndex="1" />
+  <GroupBox Name="ComponentBox" Location="10, 44" Size="275, 161" Text="Components" TabIndex="2">
+    <CheckBox Name="SecAssociateFiles" Location="5, 60" Size="265, 15" Text="Associate File Types" Checked="True" TabIndex="0" onClick="ComponentsCheckboxChange" />
+    <CheckBox Name="SecVST3" Location="5, 30" Size="265, 15" Text="VST3 Plugin" Checked="True" TabIndex="1" onClick="ComponentsCheckboxChange" />
+    <CheckBox Name="SecStartMenu" Location="5, 45" Size="265, 15" Text="Start Menu Shortcut" Checked="True" TabIndex="2" onClick="ComponentsCheckboxChange" />
+    <CheckBox Name="SecCore" Location="5, 15" Size="265, 15" Text="Core Components" Checked="True" TabIndex="3" Enabled="False" onClick="ComponentsCheckboxChange" />
   </GroupBox>
   <Label Name="Label1" Location="0, 0" Size="450, 32" Text="Component Selection" Font="Fira Sans, 20pt, style=Bold" TabIndex="3" />
 </Dialog>

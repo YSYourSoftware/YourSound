@@ -1,0 +1,76 @@
+{
+	"id": "org.yoursoftware.sound.factory",
+	"name": "YourSound Factory Content",
+	"description": "Free and extensive sound library for YourSound.\nContains sampled instruments, synthesisers and more!",
+	"author": "YourSoftware",
+	"version": [1, 0, 0],
+	"playerVersionMin": [-1, -1, -1],
+	"playerVersionMax": [-1, -1, -1],
+	"binPlayersRequired": true,
+	"binPlayers": [
+		{
+			"id": "org.yoursoftware.sound.sampler",
+			"sharedLibraryKey": "all",
+			"name": "Sample Player",
+			"frontFacing": true,
+			"actions": []
+		}, {
+			"id": "org.yoursoftware.sound.sf2",
+			"sharedLibraryKey": "all",
+			"name": "SoundFont Player",
+			"frontFacing": false,
+			"actions": [
+				{
+					"symbol": "action_import_sf2",
+					"pass": [
+						{
+							"type": "filepath",
+							"extensions": [{"name": "SoundFont Files", "extension": "sf2"}]
+						}
+					], "name": "Import SF2..."
+				}, {
+					"symbol": "action_load_sf2",
+					"pass": [
+						{
+							"type": "filepath",
+							"extensions": [{"name": "SoundFont Files", "extension": "sf2"}]
+						}, {"type": "rack"}
+					], "name": "Load SF2..."
+				}
+			]
+		}, {
+			"id": "org.yoursoftware.sound.hexwave",
+			"sharedLibraryKey": "all",
+			"name": "HexWave Player",
+			"frontFacing": true
+		}, {
+			"id": "org.yoursoftware.sound.emu-emulator-x",
+			"sharedLibraryKey": "all",
+			"name": "E-MU Emulator X Player",
+			"frontFacing": false,
+			"actions": [
+				{
+					"symbol": "action_import_exb",
+					"pass": [
+						{
+							"type": "filepath",
+							"extensions": [{"name": "Emulator X Bank Files", "extension": "exb"}]
+						}
+					], "name": "Import EXB..."
+				}, {
+					"symbol": "action_load_exb",
+					"pass": [
+						{
+							"type": "filepath",
+							"extensions": [{"name": "Emulator X Bank Files", "extension": "exb"}]
+						}, {"type": "rack"}
+					], "name": "Load EXB..."
+				}
+			]
+		}
+	], "binPlayerCompat": [
+		"windows",
+		"macos",
+		"linux"
+	]
+}

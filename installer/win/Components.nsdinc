@@ -10,8 +10,7 @@ Var hCtl_Components
 Var hCtl_Components_HLine1
 Var hCtl_Components_SizeLabel
 Var hCtl_Components_ComponentBox
-Var hCtl_Components_SecFactory
-Var hCtl_Components_SecAU
+Var hCtl_Components_SecAssociateFiles
 Var hCtl_Components_SecVST3
 Var hCtl_Components_SecStartMenu
 Var hCtl_Components_SecCore
@@ -51,28 +50,22 @@ Function fnc_Components_Create
   Pop $hCtl_Components_ComponentBox
   SendMessage $hCtl_Components_ComponentBox ${WM_SETFONT} $hCtl_Components_Font1 0
   
-  ; === SecFactory (type: Checkbox) ===
-  ${NSD_CreateCheckbox} 10u 73u 174u 9u "Factory Library"
-  Pop $hCtl_Components_SecFactory
-  SendMessage $hCtl_Components_SecFactory ${WM_SETFONT} $hCtl_Components_Font1 0
-  ${NSD_OnClick} $hCtl_Components_SecFactory ComponentsCheckboxChange
-  ${NSD_Check} $hCtl_Components_SecFactory
-  
-  ; === SecAU (type: Checkbox) ===
-  ${NSD_CreateCheckbox} 10u 64u 174u 9u "AU Plugin"
-  Pop $hCtl_Components_SecAU
-  SendMessage $hCtl_Components_SecAU ${WM_SETFONT} $hCtl_Components_Font1 0
-  ${NSD_OnClick} $hCtl_Components_SecAU ComponentsCheckboxChange
+  ; === SecAssociateFiles (type: Checkbox) ===
+  ${NSD_CreateCheckbox} 10u 64u 174u 9u "Associate File Types"
+  Pop $hCtl_Components_SecAssociateFiles
+  SendMessage $hCtl_Components_SecAssociateFiles ${WM_SETFONT} $hCtl_Components_Font1 0
+  ${NSD_OnClick} $hCtl_Components_SecAssociateFiles ComponentsCheckboxChange
+  ${NSD_Check} $hCtl_Components_SecAssociateFiles
   
   ; === SecVST3 (type: Checkbox) ===
-  ${NSD_CreateCheckbox} 10u 55u 174u 9u "VST3 Plugin"
+  ${NSD_CreateCheckbox} 10u 46u 174u 9u "VST3 Plugin"
   Pop $hCtl_Components_SecVST3
   SendMessage $hCtl_Components_SecVST3 ${WM_SETFONT} $hCtl_Components_Font1 0
   ${NSD_OnClick} $hCtl_Components_SecVST3 ComponentsCheckboxChange
   ${NSD_Check} $hCtl_Components_SecVST3
   
   ; === SecStartMenu (type: Checkbox) ===
-  ${NSD_CreateCheckbox} 10u 46u 174u 9u "Start Menu Shortcut"
+  ${NSD_CreateCheckbox} 10u 55u 174u 9u "Start Menu Shortcut"
   Pop $hCtl_Components_SecStartMenu
   SendMessage $hCtl_Components_SecStartMenu ${WM_SETFONT} $hCtl_Components_Font1 0
   ${NSD_OnClick} $hCtl_Components_SecStartMenu ComponentsCheckboxChange
@@ -91,10 +84,4 @@ Function fnc_Components_Create
   Pop $hCtl_Components_Label1
   SendMessage $hCtl_Components_Label1 ${WM_SETFONT} $hCtl_Components_Font2 0
   
-FunctionEnd
-
-; dialog show function
-Function fnc_Components_Show
-  Call fnc_Components_Create
-  nsDialogs::Show
 FunctionEnd

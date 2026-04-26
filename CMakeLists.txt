@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.15)
 
 file(READ "core/include/YourSound/Version.hpp" YS_VERSION_FILE)
 string(REGEX MATCH "#define[ ]+YS_VERSION_MAJOR[ ]+([0-9]+)" _ ${YS_VERSION_FILE})
@@ -16,11 +16,29 @@ project(YourSound
 	LANGUAGES CXX
 )
 
-option(YS_BUILD_VST3 "Build VST3 Plugin" ON)
-option(YS_BUILD_AU "Build AU Plugin" ON)
-option(YS_BUILD_WEB "Build Web Integration" OFF)
+option(YS_BUILD_PLUGIN "Build Plugin" OFF)
+option(YS_BUILD_INSTALL "Build Application installer and Library Manager" OFF)
+option(YS_BUILD_FACTORY "Build Factory Binary Players" OFF)
+
+add_subdirectory(lib)
 
 add_subdirectory(core)
-add_subdirectory(plugin)
 
-target_compile_features(YourSound PUBLIC cxx_std_23)
+if(YS_BUILD_PLUGIN)
+	add_subdirectory(plugin)
+endif()
+
+if(YS_BUILD_INSTALL)
+	add_subdirectory(libmgr)
+	add_subdirectory(installer)
+	add_subdirectory(libtest)
+endif()
+
+if(YS_BUILD_FACTORY)
+	add_subdirectory(factory)
+endif()
+
+if(MSVC)
+	set(CMAKE_CXX_FLAGS_DEBUG "/Od")
+	set(CMAKE_CXX_FLAGS_RELEASE "/Ox")
+endif()

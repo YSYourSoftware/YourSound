@@ -1,12 +1,13 @@
 Name "YourSound"
 
-OutFile "..\..\build\YSInstall.exe"
+OutFile "..\..\build\Install YourSound.exe"
 BrandingText " "
 
 !define MUI_ICON ".\install.ico"
 !define MUI_UNICON ".\uninstall.ico"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP ".\icon-top.bmp"
+!define MUI_HEADERIMAGE_UNBITMAP ".\icon-top.bmp"
 !define MUI_HEADERIMAGE_RIGHT
 
 !define REG_UNINS "Software\Microsoft\Windows\CurrentVersion\Uninstall\YourSound"
@@ -16,35 +17,46 @@ BrandingText " "
 !include MUI2.nsh
 !include LogicLib.nsh
 
-!insertmacro MUI_LANGUAGE English
+!include "AssociateFileType.nsh"
 
 !include "Welcome.nsdinc"
+!include "Conflicting.nsdinc"
 !include "Components.nsdinc"
 !include "Paths.nsdinc"
 !include "Finish.nsdinc"
-!include "UninsWelcome.nsdinc"
+
+!include "UnWelcome.nsdinc"
+!include "UnFinish.nsdinc"
+
+!insertmacro MUI_LANGUAGE English
 
 Var VST3Location
-Var AULocation
 Var LIBLocation
+Var NewInstall
 
 Section "Core Components" SecCore
 	SetRegView 64
 	SectionIn RO
 	SetOutPath "$INSTDIR"
-	File "YourSound.exe"
-	File "..\..\assets\icon.ico"
 
-	WriteRegStr HKLM "${REG_DATA}" "InstallLocation" "$INSTDIR"
+	File /r "..\..\assets\*"
+
+	File "temp\YourSound.exe"
+	File "temp\YSLibMgr.exe"
+	File "temp\SDL3.dll"
+
+	CreateDirectory $LIBLocation
+
+	WriteRegStr HKLM "${REG_DATA}" "InstallLocation" $INSTDIR
+	WriteRegStr HKLM "${REG_DATA}" "LibraryLocation" $LIBLocation
 	WriteRegDWORD HKLM "${REG_DATA}" "ComponentCore" 1
 
 	WriteUninstaller "uninstall.exe"
 
-	# Uninstall Registry Values
 	WriteRegStr HKLM "${REG_UNINS}" "DisplayName" "YourSound"
 	WriteRegStr HKLM "${REG_UNINS}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
 	WriteRegStr HKLM "${REG_UNINS}" "InstallLocation" "$\"$INSTDIR$\""
-	WriteRegStr HKLM "${REG_UNINS}" "DisplayIcon" "$\"$INSTDIR\icon.ico$\""
+	WriteRegStr HKLM "${REG_UNINS}" "DisplayIcon" "$\"$INSTDIR\icon-short.ico$\""
 	WriteRegStr HKLM "${REG_UNINS}" "Publisher" "YourSoftware"
 	WriteRegDWORD HKLM "${REG_UNINS}" "Language" $Language
 	WriteRegDWORD HKLM "${REG_UNINS}" "NoModify" 1
@@ -59,8 +71,14 @@ Section "un.Core Components" UnCore
 SectionEnd
 
 Section "Start Menu Shortcut" SecStartMenu
+	SetRegView 64
+	WriteRegDWORD HKLM "${REG_DATA}" "ComponentStartMenu" 1
 	CreateDirectory "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\YourSoftware"
 	CreateShortcut "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\YourSoftware\YourSound.lnk" "$INSTDIR\YourSound.exe"
+SectionEnd
+
+Section "un.Start Menu Shortcut" UnStartMenu
+	Delete "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\YourSoftware\YourSound.lnk"
 SectionEnd
 
 Section "VST3 Plugin" SecVST3
@@ -68,31 +86,47 @@ Section "VST3 Plugin" SecVST3
 	WriteRegDWORD HKLM "${REG_DATA}" "ComponentVST3" 1
 SectionEnd
 
-Section /o "AU Plugin" SecAU
-	SetRegView 64
-	WriteRegDWORD HKLM "${REG_DATA}" "ComponentAU" 1
+Section "un.VST3 Plugin" UnVST3
 SectionEnd
 
-Section "Factory Library" SecFactory
+Section "Associate File Types" SecAssociateFiles
 	SetRegView 64
-	WriteRegDWORD HKLM "${REG_DATA}" "ComponentFactory" 1
+	WriteRegDWORD HKLM "${REG_DATA}" "ComponentAssociateFiles" 1
+
+	!insertmacro AssociateFileType \
+    	".yslib" \
+    	"YourSound Library" \
+    	'"$INSTDIR\icon-library.ico"' \
+    	'"$INSTDIR\YSLibMgr.exe" install "%1"' \
+    	"YourSound.LibraryPackage" \
+    	"compressed"
+    !insertmacro AssociateFileType \
+    	".yspp" \
+    	"YourSound Player Preset" \
+    	"$INSTDIR\YourSound.exe,1" \
+    	'"$INSTDIR\YourSound.exe" --rack-load-player-preset "%1"' \
+    	"YourSound.PlayerPresetRackElement" \
+    	"document"
+    !insertmacro AssociateFileType \
+        ".ysrs" \
+        "YourSound Rack State" \
+        "$INSTDIR\YourSound.exe,1" \
+        '"$INSTDIR\YourSound.exe" --rack-load "%1"' \
+        "YourSound.RackState" \
+        "document"
+SectionEnd
+
+Section "un.Associate File Types" UnAssociateFiles
+	SetRegView 64
+	DeleteRegKey HKCR ".yslib"
+	DeleteRegKey HKCR ".yspp"
+	DeleteRegKey HKCR ".ysrs"
+	DeleteRegKey HKCR "YourSound.LibraryPackage"
+	DeleteRegKey HKCR "YourSound.PlayerPresetRackElement"
+	DeleteRegKey HKCR "YourSound.RackState"
 SectionEnd
 
 Function ComponentsPageLeave
-	${NSD_GetState} $hCtl_Components_SecFactory $0
-	${If} $0 == ${BST_CHECKED}
-		SectionSetFlags ${SecFactory} ${SF_SELECTED}
-	${Else}
-		SectionSetFlags ${SecFactory} 0
-	${EndIf}
-
-	${NSD_GetState} $hCtl_Components_SecAU $0
-	${If} $0 == ${BST_CHECKED}
-		SectionSetFlags ${SecAU} ${SF_SELECTED}
-	${Else}
-		SectionSetFlags ${SecAU} 0
-	${EndIf}
-
 	${NSD_GetState} $hCtl_Components_SecVST3 $0
 	${If} $0 == ${BST_CHECKED}
 		SectionSetFlags ${SecVST3} ${SF_SELECTED}
@@ -107,6 +141,13 @@ Function ComponentsPageLeave
 		SectionSetFlags ${SecStartMenu} 0
 	${EndIf}
 
+	${NSD_GetState} $hCtl_Components_SecAssociateFiles $0
+    ${If} $0 == ${BST_CHECKED}
+    	SectionSetFlags ${SecAssociateFiles} ${SF_SELECTED}
+    ${Else}
+    	SectionSetFlags ${SecAssociateFiles} 0
+    ${EndIf}
+
 	${NSD_GetState} $hCtl_Components_SecCore $0
 	${If} $0 == ${BST_CHECKED}
 		SectionSetFlags ${SecCore} ${SF_SELECTED}
@@ -117,18 +158,6 @@ FunctionEnd
 
 Function ComponentsCheckboxChange
 	StrCpy $0 0
-
-	${NSD_GetState} $hCtl_Components_SecFactory $1
-	${If} $1 == ${BST_CHECKED}
-		SectionGetSize ${SecFactory} $2
-		IntOp $0 $0 + $2
-	${EndIf}
-
-	${NSD_GetState} $hCtl_Components_SecAU $1
-	${If} $1 == ${BST_CHECKED}
-		SectionGetSize ${SecAU} $2
-		IntOp $0 $0 + $2
-	${EndIf}
 
 	${NSD_GetState} $hCtl_Components_SecVST3 $1
 	${If} $1 == ${BST_CHECKED}
@@ -142,6 +171,12 @@ Function ComponentsCheckboxChange
 		IntOp $0 $0 + $2
 	${EndIf}
 
+	${NSD_GetState} $hCtl_Components_SecAssociateFiles $1
+    ${If} $1 == ${BST_CHECKED}
+    	SectionGetSize ${SecAssociateFiles} $2
+    	IntOp $0 $0 + $2
+    ${EndIf}
+
 	${NSD_GetState} $hCtl_Components_SecCore $1
 	${If} $1 == ${BST_CHECKED}
 		SectionGetSize ${SecCore} $2
@@ -152,21 +187,35 @@ Function ComponentsCheckboxChange
 FunctionEnd
 
 Function ComponentsPageShow
-	Call fnc_Components_Create
-	Call ComponentsCheckboxChange
-	nsDialogs::Show
+	SetRegView 64
+
+	ReadRegStr $INSTDIR HKLM "${REG_DATA}" "InstallLocation"
+	StrLen $NewInstall $INSTDIR
+
+	${If} $NewInstall == 0
+		Call fnc_Components_Create
+		Call ComponentsCheckboxChange
+		nsDialogs::Show
+	${Else}
+		Call fnc_Conflicting_Create
+		${NSD_SetText} $hCtl_Conflicting_YSInstallLocation $INSTDIR
+		nsDialogs::Show
+	${EndIf}
 FunctionEnd
 
 Function PathsPageShow
-	Call fnc_Paths_Create
-	nsDialogs::Show
+	${If} $NewInstall == 0
+		Call fnc_Paths_Create
+		nsDialogs::Show
+	${EndIf}
 FunctionEnd
 
 Function PathsPageLeave
-	${NSD_GetText} $hCtl_Paths_EXELocationInput_Txt $INSTDIR
-	${NSD_GetText} $hCtl_Paths_LIBLocationInput_Txt $LIBLocation
-	${NSD_GetText} $hCtl_Paths_AULocationInput_Txt $VST3Location
-	${NSD_GetText} $hCtl_Paths_VST3LocationInput_Txt $AULocation
+	${If} $NewInstall == 0
+		${NSD_GetText} $hCtl_Paths_EXELocationInput_Txt $INSTDIR
+		${NSD_GetText} $hCtl_Paths_LIBLocationInput_Txt $LIBLocation
+		${NSD_GetText} $hCtl_Paths_VST3LocationInput_Txt $VST3Location
+	${EndIf}
 FunctionEnd
 
 Function FinishLeave
@@ -176,11 +225,22 @@ Function FinishLeave
 	${EndIf}
 FunctionEnd
 
-#Function un.Welcome
-	#Call fnc_UninsWelcome_Show
-#FunctionEnd
+Function un.WelcomeShow
 
-#UninstPage uninstConfirm un.Welcome /ENABLECANCEL
+	Call un.fnc_UnWelcome_Show
+FunctionEnd
+
+Function un.FinishLeave
+	${NSD_GetState} hCtl_UnFinish_TellUs $0
+	${If} $0 == ${BST_CHECKED}
+		ExecShell "open" "https://YourSoftware.org/projects/YourSound/feedback.html?ctx=uninstall"
+	${EndIf}
+FunctionEnd
+
+UninstPage custom un.WelcomeShow
+UninstPage instfiles
+UninstPage custom un.fnc_UnFinish_Show un.FinishLeave
+
 Page custom fnc_Welcome_Show
 Page custom ComponentsPageShow ComponentsPageLeave
 Page custom PathsPageShow PathsPageLeave

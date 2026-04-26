@@ -1,2 +1,8 @@
 build/
 */build/
+installer/win/temp/
+
+.idea/
+.vscode/
+
+*.yslib

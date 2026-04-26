@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/factory/binary/lib/TinySoundFont" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/ImGui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/JUCE" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/SArc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/SArc/lib/CLI11" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/SArc/lib/inflatecpp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/SArc/lib/utfcpp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/SDL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/imgui-knobs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/imgui_club" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/imgui_juce" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/json" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/utfcpp" vcs="Git" />
+  </component>
+</project>

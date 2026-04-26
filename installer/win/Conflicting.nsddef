@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This file was created by NSISDialogDesigner 1.6.0.0
+https://coolsoft.altervista.org/nsisdialogdesigner
+Do not edit manually!
+-->
+<Dialog Name="Conflicting" Font="Fira Sans, 8.25pt" Title="Installing YourSound..." Subtitle="Conflicting Installation" GenerateShowFunction="False">
+  <HLine Name="HLine1" Location="0, 32" Size="450, 2" />
+  <Label Name="Label3" Location="5, 90" Size="440, 129" Text="If you continue, it will be overwritten.&#xD;&#xA;To change the location or components of the install, uninstall the old version first." TabIndex="1" />
+  <TextBox Name="YSInstallLocation" Location="10, 60" Size="430, 21" Text="YSInstallLocation" TabIndex="2" Enabled="False" />
+  <Label Name="Label2" Location="5, 40" Size="440, 13" Text="YourSound is already installed in the following folder:" TabIndex="3" />
+  <Label Name="Label1" Location="0, 0" Size="450, 32" Text="Conflicting Installation" Font="Fira Sans, 20pt, style=Bold" TabIndex="4" />
+</Dialog>

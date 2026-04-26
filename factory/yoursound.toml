@@ -1,9 +1,0 @@
-[library]
-id = "b3686004ef3b40df898eab0f0cbaad2c" # ver4 uuid
-name = "YourSound Factory Content"
-authors = ["GloriousGlider8"]
-description = "YourSound Factory Content"
-sublibs_seperate = false
-
-[icons]
-square96 = "square.png"

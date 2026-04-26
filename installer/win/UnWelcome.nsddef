@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This file was created by NSISDialogDesigner 1.6.0.0
+https://coolsoft.altervista.org/nsisdialogdesigner
+Do not edit manually!
+-->
+<Dialog Name="UnWelcome" Font="Fira Sans, 8.25pt" Title="Uninstalling YourSound..." Subtitle="Welcome" SetupType="Uninstall">
+  <HLine Name="HLine1" Location="0, 32" Size="450, 2" />
+  <Bitmap Name="Bitmap1" Location="15, 125" Size="90, 90" ImageFilename=".\icon-90.bmp" TabIndex="1" />
+  <Label Name="Label2" Location="5, 40" Size="440, 100" Text="Welcome to the YourSound Uninstaller!&#xD;&#xA;&#xD;&#xA;You will now be led through the uninstallation process to remove YourSound and all of its components from your computer.&#xD;&#xA;&#xD;&#xA;All libraries will be deleted and projects using YourSound will no longer load." TabIndex="2" />
+  <Label Name="Label1" Location="0, 0" Size="450, 32" Text="YourSound Uninstaller" Font="Fira Sans, 20pt, style=Bold" TabIndex="3" />
+</Dialog>

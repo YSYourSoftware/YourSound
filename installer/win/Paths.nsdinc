@@ -8,10 +8,9 @@
 ; handle variables
 Var hCtl_Paths
 Var hCtl_Paths_HLine1
+Var hCtl_Paths_Label2
 Var hCtl_Paths_LIBLocationInput_Txt
 Var hCtl_Paths_LIBLocationInput_Btn
-Var hCtl_Paths_AULocationInput_Txt
-Var hCtl_Paths_AULocationInput_Btn
 Var hCtl_Paths_VST3LocationInput_Txt
 Var hCtl_Paths_VST3LocationInput_Btn
 Var hCtl_Paths_EXELocationInput_Txt
@@ -19,7 +18,6 @@ Var hCtl_Paths_EXELocationInput_Btn
 Var hCtl_Paths_Label1
 Var hCtl_Paths_GroupBox2
 Var hCtl_Paths_GroupBox1
-Var hCtl_Paths_GroupBox3
 Var hCtl_Paths_GroupBox4
 Var hCtl_Paths_Font1
 Var hCtl_Paths_Font2
@@ -46,27 +44,21 @@ Function fnc_Paths_Create
   Pop $hCtl_Paths_HLine1
   SendMessage $hCtl_Paths_HLine1 ${WM_SETFONT} $hCtl_Paths_Font1 0
   
+  ; === Label2 (type: Label) ===
+  ${NSD_CreateLabel} 3u 108u 290u 27u "Ensure that the Library Install Location has lots of remaining space."
+  Pop $hCtl_Paths_Label2
+  SendMessage $hCtl_Paths_Label2 ${WM_SETFONT} $hCtl_Paths_Font1 0
+  
   ; === LIBLocationInput_Txt (type: Text) ===
-  ${NSD_CreateText} 7u 118u 262u 13u "C:\Program Files\YourSoftware\YourSound\Libraries"
+  ${NSD_CreateText} 7u 90u 262u 13u "C:\Program Files\YourSoftware\YourSound\Libraries"
   Pop $hCtl_Paths_LIBLocationInput_Txt
   SendMessage $hCtl_Paths_LIBLocationInput_Txt ${WM_SETFONT} $hCtl_Paths_Font1 0
   
   ; === LIBLocationInput_Btn (type: Button) ===
-  ${NSD_CreateButton} 270u 121u 20u 8u "..."
+  ${NSD_CreateButton} 270u 92u 20u 8u "..."
   Pop $hCtl_Paths_LIBLocationInput_Btn
   SendMessage $hCtl_Paths_LIBLocationInput_Btn ${WM_SETFONT} $hCtl_Paths_Font1 0
   ${NSD_OnClick} $hCtl_Paths_LIBLocationInput_Btn fnc_hCtl_Paths_LIBLocationInput_Click
-  
-  ; === AULocationInput_Txt (type: Text) ===
-  ${NSD_CreateText} 7u 90u 262u 13u ""
-  Pop $hCtl_Paths_AULocationInput_Txt
-  SendMessage $hCtl_Paths_AULocationInput_Txt ${WM_SETFONT} $hCtl_Paths_Font1 0
-  
-  ; === AULocationInput_Btn (type: Button) ===
-  ${NSD_CreateButton} 270u 92u 20u 8u "..."
-  Pop $hCtl_Paths_AULocationInput_Btn
-  SendMessage $hCtl_Paths_AULocationInput_Btn ${WM_SETFONT} $hCtl_Paths_Font1 0
-  ${NSD_OnClick} $hCtl_Paths_AULocationInput_Btn fnc_hCtl_Paths_AULocationInput_Click
   
   ; === VST3LocationInput_Txt (type: Text) ===
   ${NSD_CreateText} 7u 62u 262u 13u "C:\Program Files\Common Files\VST3"
@@ -105,23 +97,13 @@ Function fnc_Paths_Create
   Pop $hCtl_Paths_GroupBox1
   SendMessage $hCtl_Paths_GroupBox1 ${WM_SETFONT} $hCtl_Paths_Font1 0
   
-  ; === GroupBox3 (type: GroupBox) ===
-  ${NSD_CreateGroupBox} 3u 81u 290u 25u "AU Install Location"
-  Pop $hCtl_Paths_GroupBox3
-  SendMessage $hCtl_Paths_GroupBox3 ${WM_SETFONT} $hCtl_Paths_Font1 0
-  
   ; === GroupBox4 (type: GroupBox) ===
-  ${NSD_CreateGroupBox} 3u 110u 290u 25u "Library Install Location"
+  ${NSD_CreateGroupBox} 3u 81u 290u 25u "Library Install Location"
   Pop $hCtl_Paths_GroupBox4
   SendMessage $hCtl_Paths_GroupBox4 ${WM_SETFONT} $hCtl_Paths_Font1 0
   
 FunctionEnd
 
-; dialog show function
-Function fnc_Paths_Show
-  Call fnc_Paths_Create
-  nsDialogs::Show
-FunctionEnd
 
 
 ; onClick handler for DirRequest Button $hCtl_Paths_LIBLocationInput_Btn
@@ -133,19 +115,6 @@ Function fnc_hCtl_Paths_LIBLocationInput_Click
 		Pop $R0
 		${If} "$R0" != "error"
 			${NSD_SetText} $hCtl_Paths_LIBLocationInput_Txt "$R0"
-		${EndIf}
-	${EndIf}
-FunctionEnd
-
-; onClick handler for DirRequest Button $hCtl_Paths_AULocationInput_Btn
-Function fnc_hCtl_Paths_AULocationInput_Click
-	Pop $R0
-	${If} $R0 == $hCtl_Paths_AULocationInput_Btn
-		${NSD_GetText} $hCtl_Paths_AULocationInput_Txt $R0
-		nsDialogs::SelectFolderDialog /NOUNLOAD "" "$R0"
-		Pop $R0
-		${If} "$R0" != "error"
-			${NSD_SetText} $hCtl_Paths_AULocationInput_Txt "$R0"
 		${EndIf}
 	${EndIf}
 FunctionEnd
