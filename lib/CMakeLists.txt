@@ -1,5 +1,6 @@
 add_subdirectory(JUCE)
 
+add_subdirectory(dr_libs)
 add_subdirectory(imgui_juce)
 add_subdirectory(json)
 add_subdirectory(SArc)

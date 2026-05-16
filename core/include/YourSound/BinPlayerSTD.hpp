@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <numbers>
 #include <source_location>
 
 #ifdef _WIN32
@@ -65,7 +66,7 @@ namespace YourSound {
 }
 
 namespace YourSound::BinPlayer {
-	enum BasicOscillator {
+	enum BasicOscillator : uint8_t {
 		SQUARE = 0,
 		TRIANGLE = 1,
 		SINE = 2,
@@ -98,8 +99,9 @@ namespace YourSound::BinPlayer {
 		*osc = static_cast<BasicOscillator>(current);
 	}
 
-	[[nodiscard]] inline float midi_to_freq(const uint8_t midiNote) {
-		return 440.f * std::powf(2.f, (static_cast<float>(midiNote) - 69.f) / 12.f);
+	[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f, const float tuning = 440.f) {
+		const float semis = (static_cast<float>(midi_note) - 69.f) + pitch_bend * 2.f;
+		return tuning * std::exp2f(semis / 12.f);
 	}
 
 	[[nodiscard]] inline float calculate_basic_osc(const BasicOscillator osc, float time) {
@@ -111,7 +113,7 @@ namespace YourSound::BinPlayer {
 			case TRIANGLE:
 				return (time < 0.5f) ? (time * 2.0f) : (2.0f - 2.0f * time);
 			case SINE:
-				return 0.5f * (std::sinf(time) + 1.0f);
+				return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi) + 1.0f);
 			case SAWTOOTH:
 				return time;
 			case NOISE:
@@ -124,5 +126,12 @@ namespace YourSound::BinPlayer {
 	inline void scale_float_array(float *arr, const uint32_t n, const float factor) {
 		if (factor == 1.f) return;
 		for (uint32_t i = 0; i < n; ++i) arr[i] *= factor;
+	}
+
+	inline void mono_to_stereo(const float *mono_array, float *stereo_array, const uint16_t samples) {
+		for (uint16_t i = 0; i < samples; i += 2) {
+			stereo_array[i] = mono_array[i];
+			stereo_array[i + 1] = mono_array[i];
+		}
 	}
 }

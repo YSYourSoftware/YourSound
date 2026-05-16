@@ -35,8 +35,13 @@ void BinPlayerHexwave::render(float *output_buffer, const uint16_t number_sample
 		return;
 	}
 
-	hexwave_generate_samples(output_buffer, number_samples * 2, m_hexwave, YourSound::BinPlayer::midi_to_freq(m_note_on) / m_sample_rate);
-	YourSound::BinPlayer::scale_float_array(output_buffer, number_samples * 2, m_note_velocity);
+	auto *mono_buffer = new float[number_samples];
+
+	hexwave_generate_samples(mono_buffer, number_samples, m_hexwave, YourSound::BinPlayer::midi_to_freq(m_note_on, m_pitch_bend) / m_sample_rate);
+	YourSound::BinPlayer::scale_float_array(mono_buffer, number_samples * 2, m_note_velocity);
+	YourSound::BinPlayer::mono_to_stereo(mono_buffer, output_buffer, number_samples);
+
+	delete[] mono_buffer;
 }
 
 uint64_t BinPlayerHexwave::store_calc_size(bool store_reference) const {return 1 + 4 + 4 + 4;}
@@ -55,14 +60,14 @@ void BinPlayerHexwave::load(const uint8_t *input_buffer) {
 	m_zero_wait = YourSound::read_float_be<float>(input_buffer + offset); offset += 4;
 }
 
-void BinPlayerHexwave::set_bpm(const uint16_t value) {m_bpm = value;}
 void BinPlayerHexwave::set_sample_rate(const uint32_t value) {m_sample_rate = value;}
 void BinPlayerHexwave::set_parameter(const char *param_id, const float value) {
-	if (strcmp(param_id, "reflect") == 0) {if (value >= 0.5) m_reflect = true; else m_reflect = false;}
-	else if (strcmp(param_id, "peak_time") == 0) m_peak_time = value;
-	else if (strcmp(param_id, "half_height") == 0) m_half_height = value * 2.f - 1.f;
-	else if (strcmp(param_id, "zero_wait") == 0) m_zero_wait = value;
-	p_update_params();
+	if (std::strcmp(param_id, "reflect") == 0) {if (value >= 0.5) m_reflect = true; else m_reflect = false; p_update_params();}
+	else if (std::strcmp(param_id, "peak_time") == 0) {m_peak_time = value; p_update_params();}
+	else if (std::strcmp(param_id, "half_height") == 0) {m_half_height = value * 2.f - 1.f; p_update_params();}
+	else if (std::strcmp(param_id, "zero_wait") == 0) {m_zero_wait = value; p_update_params();}
+
+	else if (std::strcmp(param_id, "_pitch_bend") == 0) m_pitch_bend = value * 2.f - 1.f;
 }
 
 void BinPlayerHexwave::get_parameters(const char **buffer) const {

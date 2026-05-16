@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/factory/binary/lib/TinySoundFont" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/factory/release/samples" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/ImGui" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/JUCE" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/SArc" vcs="Git" />
@@ -10,6 +11,8 @@
     <mapping directory="$PROJECT_DIR$/lib/SArc/lib/inflatecpp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/SArc/lib/utfcpp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/SDL" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/dr_libs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/dr_libs/tests/external/miniaudio" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/imgui-knobs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/imgui_club" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/imgui_juce" vcs="Git" />

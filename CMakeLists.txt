@@ -19,6 +19,7 @@ project(YourSound
 option(YS_BUILD_PLUGIN "Build Plugin" OFF)
 option(YS_BUILD_INSTALL "Build Application installer and Library Manager" OFF)
 option(YS_BUILD_FACTORY "Build Factory Binary Players" OFF)
+option(YS_BUILD_QUICKSAMPLE "Build YourSound QuickSample" OFF)
 
 add_subdirectory(lib)
 
@@ -38,7 +39,11 @@ if(YS_BUILD_FACTORY)
 	add_subdirectory(factory)
 endif()
 
+if(YS_BUILD_QUICKSAMPLE)
+	add_subdirectory(quicksample)
+endif()
+
 if(MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "/Od")
-	set(CMAKE_CXX_FLAGS_RELEASE "/Ox")
+	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 endif()

@@ -12,9 +12,9 @@ namespace YourSound::BinPlayer::Integrated {
 
 			void render(float *output_buffer, uint16_t number_samples) override;
 
-			uint64_t store_calc_size(bool store_reference) const override;
-			void store(uint8_t *output_buffer, bool store_reference) const override;
-			void load(const uint8_t *input_buffer) override;
+			uint64_t store_calc_size(bool store_reference) const override {return 1;}
+			void store(uint8_t *output_buffer, bool store_reference) const override {output_buffer[0] = m_osc;}
+			void load(const uint8_t *input_buffer) override {m_osc = static_cast<BasicOscillator>(input_buffer[0]);}
 
 			void set_bpm(const uint16_t value) override {}
 			void set_sample_rate(const uint32_t value) override {m_sample_rate = value;}
@@ -25,16 +25,19 @@ namespace YourSound::BinPlayer::Integrated {
 
 			void render_graphics(YS_ImContextHandle im_context) override;
 
-			void reset() override {m_note_midi = 0; m_note_velocity = 0.f;};
+			void reset() override {m_note_midi = 0; m_note_velocity = 0.f; m_pitch_bend = 0.f;}
 
 			const char *get_id() const override {return "org.yoursoftware.sound.basic-osc";}
 		private:
 			BasicOscillator m_osc = SQUARE;
+			float m_phase = 0.f;
 
 			uint32_t m_sample_rate = 0;
 
 			uint8_t m_note_midi = 0;
 			float m_note_velocity = 0.f;
+
+			float m_pitch_bend = 0.f;
 	};
 
 	inline YS_CORE_EXPORT_NO_EXTERN void register_basic_osc_player() {

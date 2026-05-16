@@ -1,5 +1,6 @@
 #pragma once
 
+#include <YourSound/ResourceTypes/BinaryResource.hpp>
 #include <YourSound/BinPlayerSTD.hpp>
 #include <YourSound/Rack.hpp>
 
@@ -22,10 +23,10 @@ class BinPlayerSF2 : public YourSound::Player {
 		void store(uint8_t *output_buffer, bool store_reference) const override;
 		void load(const uint8_t *input_buffer) override;
 
-		void set_bpm(uint16_t value) override;
+		void set_bpm(uint16_t value) override {}
 		void set_sample_rate(uint32_t value) override;
 
-		void set_parameter(const char *param_id, float value) override {}
+		void set_parameter(const char *param_id, const float value) override {if (std::strcmp(param_id, "_pitch_bend")) m_pitch_bend = value * 2.f - 1.f;}
 		void get_parameters(const char **buffer) const override {}
 		uint8_t get_parameter_count() const override {return 0;}
 
@@ -37,7 +38,7 @@ class BinPlayerSF2 : public YourSound::Player {
 
 		const char *get_id() const override {return "org.yoursoftware.sound.sf2";}
 	private:
-		YourSound::Resource m_soundfont_resource;
+		YourSound::BinaryResource m_soundfont_resource;
 
 		tsf *m_soundfont = nullptr;
 		uint16_t m_preset_id = 0;
@@ -46,8 +47,9 @@ class BinPlayerSF2 : public YourSound::Player {
 
 		float m_gain = 0.f;
 
-		uint8_t m_bpm = 0;
 		uint32_t m_sample_rate = 0;
+
+		float m_pitch_bend = 0.f;
 
 		friend void action_import_sf2(const char *filepath);
 };

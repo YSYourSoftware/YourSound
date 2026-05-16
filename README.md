@@ -1,6 +1,6 @@
 # YourSound
 
-As another entry of the [YourSoftware series](https://gloriousglider8.github.io/your), YourSound is an open source sound engine, with a very permissive licence.
+As another entry of the [YourSoftware series](https://yoursoftware.org), YourSound is an open source sound engine, with a very permissive licence.
 
 ## Project Parts
 

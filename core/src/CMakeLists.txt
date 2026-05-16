@@ -6,5 +6,10 @@ target_sources(YourSound PRIVATE
 	Config.cpp
 	Player.cpp
 	Rack.cpp
-	Resource.cpp
+PUBLIC
+	External/adpcm.c
+	External/stb_vorbis.c
+
+	ResourceTypes/BinaryResource.cpp
+	ResourceTypes/SampleResource.cpp
 )

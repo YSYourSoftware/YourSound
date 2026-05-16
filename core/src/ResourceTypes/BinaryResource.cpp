@@ -1,4 +1,4 @@
-#include "YourSound/Player.hpp"
+#include "YourSound/ResourceTypes/BinaryResource.hpp"
 
 #include "YourSound/Serialisation.hpp"
 
@@ -8,7 +8,7 @@
 
 using namespace YourSound;
 
-uint64_t Resource::store_calc_size(const bool store_reference) const {
+uint64_t BinaryResource::store_calc_size(const bool store_reference) const {
 	// data_embedded[1] + decompressed_data_length[8] + compressed_data_length[8] + compressed_data[?]
 	if (!store_reference || m_force_embedded) return 1 + 8 + 8 + SArc::helpers::lzma_get_compressed_size(std::span(reinterpret_cast<const std::byte*>(m_data.data()), m_data.size()), m_data.size());
 
@@ -16,7 +16,7 @@ uint64_t Resource::store_calc_size(const bool store_reference) const {
 	return 1 + m_path.u8string().size() + 1;
 }
 
-void Resource::store(uint8_t *output_buffer, const bool store_reference) const {
+void BinaryResource::store(uint8_t *output_buffer, const bool store_reference) const {
 	if (store_reference && !m_force_embedded) {
 		*output_buffer = 0;
 
@@ -35,7 +35,7 @@ void Resource::store(uint8_t *output_buffer, const bool store_reference) const {
 	std::memcpy(output_buffer + 17, compressed.data(), compressed.size());
 }
 
-void Resource::load(const uint8_t *input_buffer) {
+void BinaryResource::load(const uint8_t *input_buffer) {
 	if (*input_buffer == 0) {
 		m_path = std::filesystem::path(reinterpret_cast<const char*>(input_buffer + 1));
 
@@ -53,7 +53,7 @@ void Resource::load(const uint8_t *input_buffer) {
 	m_force_embedded = true;
 }
 
-void Resource::reload_file() {
+void BinaryResource::reload_file() {
 	if (m_force_embedded) return;
 
 	std::ifstream file{m_path, std::ios::binary | std::ios::ate};
@@ -66,8 +66,3 @@ void Resource::reload_file() {
 	m_data.resize(size);
 	if (!file.read(reinterpret_cast<char*>(m_data.data()), size)) throw SArc::io_error("Could not read file: " + m_path.string());
 }
-
-char *Resource::get_char_pointer() {return reinterpret_cast<char*>(m_data.data());}
-unsigned char *Resource::get_uchar_pointer() {return m_data.data();}
-
-size_t Resource::get_length() const {return m_data.size();}

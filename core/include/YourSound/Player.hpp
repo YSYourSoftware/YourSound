@@ -18,6 +18,7 @@
 
 #define YS_LOAD_API_FN(api, name) api.name = p_get_dll_func<decltype(api.name)>("player_" #name)
 
+typedef void *YS_ResourceHandle;
 typedef void *YS_PlayerHandle;
 typedef void *YS_PlayerWrapperHandle;
 typedef void *YS_ImContextHandle;
@@ -85,7 +86,7 @@ namespace YourSound {
 
 			virtual void render(float *output_buffer, uint16_t number_samples) = 0;
 
-			virtual uint64_t store_calc_size(bool store_reference) const = 0;
+			[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) const = 0;
 			virtual void store(uint8_t *output_buffer, bool store_reference) const = 0;
 			virtual void load(const uint8_t *input_buffer) = 0;
 
@@ -94,13 +95,13 @@ namespace YourSound {
 
 			virtual void set_parameter(const char *param_id, float value) = 0;
 			virtual void get_parameters(const char **buffer) const = 0;
-			virtual uint8_t get_parameter_count() const = 0;
+			[[nodiscard]] virtual uint8_t get_parameter_count() const = 0;
 
 			virtual void render_graphics(YS_ImContextHandle im_context) = 0;
 
 			virtual void reset() = 0;
 
-			virtual const char *get_id() const = 0;
+			[[nodiscard]] virtual const char *get_id() const = 0;
 	};
 
 	class PlayerWrapper : public Player {
@@ -108,7 +109,7 @@ namespace YourSound {
 			virtual void set_wrapped_player(YS_PlayerHandle player) = 0;
 	};
 
-	class YS_CORE_EXPORT_NO_EXTERN PlayerInterface : public Player {
+	class PlayerInterface : public Player {
 		public:
 			PlayerInterface(YS_PlayerHandle player_handle, const std::filesystem::path &dll_path);
 			~PlayerInterface() override = default;
@@ -164,26 +165,23 @@ namespace YourSound {
 		PlayerWrapperInterface(YS_PlayerWrapperHandle player_wrapper_handle, const std::filesystem::path &dll_path);
 	};
 
-	class YS_CORE_EXPORT_NO_EXTERN Resource {
+	class Resource {
 		public:
-			Resource() = default;
-			~Resource() = default;
+			virtual ~Resource() = default;
 
-			[[nodiscard]] uint64_t store_calc_size(bool store_reference = true) const;
-			void store(uint8_t *output_buffer, bool store_reference = true) const;
-			void load(const uint8_t *input_buffer);
+			[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) const = 0;
+			virtual void store(uint8_t *output_buffer, bool store_reference) const = 0;
+			virtual void load(const uint8_t *input_buffer) = 0;
+			virtual void reload_file() = 0;
 
 			void set_path(const std::filesystem::path &path) {m_path = path;}
 
-			void reload_file();
+			size_t get_length() const {return m_data.size();}
 
-			char *get_char_pointer();
-			unsigned char *get_uchar_pointer();
-
-			[[nodiscard]] size_t get_length() const;
-		private:
-			std::filesystem::path m_path;
+			uint8_t *pointer() {return m_data.data();}
+		protected:
 			std::vector<uint8_t> m_data;
+			std::filesystem::path m_path;
 			bool m_force_embedded = false;
 	};
 

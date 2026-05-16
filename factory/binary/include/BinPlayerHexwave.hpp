@@ -18,7 +18,7 @@ class BinPlayerHexwave : public YourSound::Player {
 		void store(uint8_t *output_buffer, bool store_reference) const override;
 		void load(const uint8_t *input_buffer) override;
 
-		void set_bpm(uint16_t value) override;
+		void set_bpm(uint16_t value) override {};
 		void set_sample_rate(uint32_t value) override;
 
 		void set_parameter(const char *param_id, float value) override;
@@ -34,8 +34,9 @@ class BinPlayerHexwave : public YourSound::Player {
 		uint8_t m_note_on = 0;
 		float m_note_velocity = 0.f;
 
-		uint8_t m_bpm = 0;
 		uint32_t m_sample_rate = 0;
+
+		float m_pitch_bend = 0.f;
 
 		float m_top_row_width = 0.f;
 		float m_knob_row_width = 0.f;

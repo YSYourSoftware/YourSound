@@ -75,13 +75,12 @@ void BinPlayerSF2::load(const uint8_t* input_buffer) {
 	m_soundfont_resource.load(input_buffer + 2);
 }
 
-void BinPlayerSF2::set_bpm(const uint16_t value) {m_bpm = value;}
 void BinPlayerSF2::set_sample_rate(const uint32_t value) {
 	m_sample_rate = value;
 	tsf_set_output(m_soundfont, TSF_STEREO_INTERLEAVED, m_sample_rate, m_gain);
 }
 
-void BinPlayerSF2::reset() {tsf_reset(m_soundfont);}
+void BinPlayerSF2::reset() {tsf_reset(m_soundfont); m_pitch_bend = 0.f;}
 
 void BinPlayerSF2::render_graphics(YS_ImContextHandle im_context) {
 	ImGui::SetCurrentContext(static_cast<ImGuiContext*>(im_context));
@@ -117,5 +116,5 @@ void BinPlayerSF2::sf2_load_from_file(const char *filepath) {
 	m_soundfont_resource.set_path(filepath);
 	m_soundfont_resource.reload_file();
 
-	m_soundfont = tsf_load_memory(m_soundfont_resource.get_char_pointer(), m_soundfont_resource.get_length());
+	m_soundfont = tsf_load_memory(m_soundfont_resource.pointer(), m_soundfont_resource.get_length());
 }

@@ -24,3 +24,9 @@ add_custom_command(TARGET YSLibTest POST_BUILD
 	$<TARGET_FILE_DIR:YSLibTest>
 	COMMAND_EXPAND_LISTS
 )
+
+add_custom_command(TARGET YSLibTest POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+	${CMAKE_SOURCE_DIR}/assets
+	$<TARGET_FILE_DIR:YSLibTest>
+)
