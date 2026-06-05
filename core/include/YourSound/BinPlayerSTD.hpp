@@ -3,11 +3,7 @@
 #include "YourSound/Player.hpp"
 #include "YourSound/Version.hpp"
 
-#include <imgui.h>
-
-#include <cmath>
 #include <cstdint>
-#include <cstring>
 #include <iostream>
 #include <numbers>
 #include <source_location>
@@ -35,7 +31,7 @@
 	YS_EXTERN_EXPORT void player_get_parameters(YS_PlayerHandle player, const char **buffer) {static_cast<YourSound::Player*>(player)->get_parameters(buffer);} \
 	YS_EXTERN_EXPORT uint8_t player_get_parameter_count(YS_PlayerHandle player) {return static_cast<YourSound::Player*>(player)->get_parameter_count();} \
 	\
-	YS_EXTERN_EXPORT void player_render_graphics(YS_PlayerHandle player, YS_ImContextHandle im_context) {static_cast<YourSound::Player*>(player)->render_graphics(im_context);} \
+	YS_EXTERN_EXPORT void player_render_graphics(YS_PlayerHandle player) {static_cast<YourSound::Player*>(player)->render_graphics();} \
 	\
 	YS_EXTERN_EXPORT void player_reset(YS_PlayerHandle player) {static_cast<YourSound::Player*>(player)->reset();} \
 	\
@@ -73,31 +69,6 @@ namespace YourSound::BinPlayer {
 		SAWTOOTH = 3,
 		NOISE = 4
 	};
-
-	inline void imgui_basic_oscillator_dropdown(BasicOscillator *osc, const char *label) {
-		uint8_t current = *osc;
-
-		const char *osc_names[5] = {
-			"Square",
-			"Triangle",
-			"Sine",
-			"Sawtooth",
-			"Noise"
-		};
-
-		if (ImGui::BeginCombo(label, osc_names[current])) {
-			for (uint16_t i = 0; i < 5; i++) {
-				const bool is_selected = i == current;
-
-				if (ImGui::Selectable(osc_names[i], is_selected)) current = i;
-				if (is_selected) ImGui::SetItemDefaultFocus();
-			}
-
-			ImGui::EndCombo();
-		}
-
-		*osc = static_cast<BasicOscillator>(current);
-	}
 
 	[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f, const float tuning = 440.f) {
 		const float semis = (static_cast<float>(midi_note) - 69.f) + pitch_bend * 2.f;

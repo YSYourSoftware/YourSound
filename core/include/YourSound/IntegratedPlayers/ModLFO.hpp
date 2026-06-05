@@ -38,7 +38,7 @@ namespace YourSound::BinPlayer::Integrated {
 			void get_parameters(const char **buffer) const override {return m_player->get_parameters(buffer);}
 			uint8_t get_parameter_count() const override {return m_player->get_parameter_count();}
 
-			void render_graphics(YS_ImContextHandle im_context) override;
+			void render_graphics() override;
 
 			void reset() override;
 

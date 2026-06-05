@@ -23,7 +23,7 @@ namespace YourSound::BinPlayer::Integrated {
 			void get_parameters(const char **buffer) const override {buffer[0] = "osc";}
 			uint8_t get_parameter_count() const override {return 1;}
 
-			void render_graphics(YS_ImContextHandle im_context) override;
+			void render_graphics() override;
 
 			void reset() override {m_note_midi = 0; m_note_velocity = 0.f; m_pitch_bend = 0.f;}
 

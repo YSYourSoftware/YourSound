@@ -1,9 +1,10 @@
 #pragma once
 
-#include <imgui.h>
 #include <SArc.hpp>
-#include <nlohmann/json.hpp>
+#include <SArc/Streaming.hpp>
 #include <SDL3/SDL.h>
+#include <imgui.h>
+#include <nlohmann/json.hpp>
 
 #include <filesystem>
 
@@ -16,7 +17,7 @@ inline ImFont *font_light;
 inline ImFont *font_heading;
 
 inline std::filesystem::path target_library_path;
-inline SArc::SArchive target_library;
+inline SArc::SArchiveStream *target_library = nullptr;
 inline nlohmann::json target_library_info;
 
 inline SDL_Texture *target_library_cover_64;

@@ -11,12 +11,35 @@
 
 #include <iostream>
 
+using namespace YourSound::BinPlayer;
+
+static void imgui_basic_oscillator_dropdown(BasicOscillator *osc, const char *label) {
+	uint8_t current = *osc;
+
+	const char *osc_names[5] = {"Square", "Triangle", "Sine", "Sawtooth", "Noise"};
+
+	if (ImGui::BeginCombo(label, osc_names[current])) {
+		for (uint16_t i = 0; i < 5; i++) {
+			const bool is_selected = i == current;
+
+			if (ImGui::Selectable(osc_names[i], is_selected)) current = i;
+			if (is_selected) ImGui::SetItemDefaultFocus();
+		}
+
+		ImGui::EndCombo();
+	}
+
+	*osc = static_cast<BasicOscillator>(current);
+}
+
 using namespace YourSound::BinPlayer::Integrated;
 
-ModLFO::~ModLFO() {ysbp_destroy_bin_player(m_player);}
+ModLFO::~ModLFO() { ysbp_destroy_bin_player(m_player); }
 
-void ModLFO::note_on(const uint8_t midi_note_number, const float velocity) {m_player->note_on(midi_note_number, velocity);}
-void ModLFO::note_off(const uint8_t midi_note_number) {m_player->note_off(midi_note_number);}
+void ModLFO::note_on(const uint8_t midi_note_number, const float velocity) {
+	m_player->note_on(midi_note_number, velocity);
+}
+void ModLFO::note_off(const uint8_t midi_note_number) { m_player->note_off(midi_note_number); }
 
 void ModLFO::render(float *output_buffer, const uint16_t number_samples) {
 	const float sample_second = 1.f / m_sample_rate;
@@ -30,19 +53,19 @@ void ModLFO::render(float *output_buffer, const uint16_t number_samples) {
 		/*uint8_t chunk_size = m_render_chunk_size;
 		if (number_samples - i > chunk_size) chunk_size = number_samples - i;*/
 
-		m_player->render(output_buffer + (i * 2), 1/*chunk_size*/);
+		m_player->render(output_buffer + (i * 2), 1 /*chunk_size*/);
 
-		//i += chunk_size;
+		// i += chunk_size;
 	}
 }
 
 uint64_t ModLFO::store_calc_size(const bool store_reference) const {
 	constexpr uint8_t constant_per_lfo = 1 + // BPM Synced
-		1 + // Reversed
-		4 + // Rate
-		4 + // Anchor
-		4 + // Scale
-		1; // OSC
+										 1 + // Reversed
+										 4 + // Rate
+										 4 + // Anchor
+										 4 + // Scale
+										 1;	 // OSC
 
 	uint32_t size = constant_per_lfo * m_lfos.size();
 	for (const LFOInfo &lfo : m_lfos) size += lfo.param_id.length() + 1;
@@ -59,15 +82,20 @@ void ModLFO::store(uint8_t *output_buffer, const bool store_reference) const {
 	for (const LFOInfo &lfo : m_lfos) {
 		output_buffer[offset++] = lfo.bpm_synced;
 		output_buffer[offset++] = lfo.reversed;
-		write_float_be<float>(output_buffer + offset, lfo.rate); offset += 4;
-		write_float_be<float>(output_buffer + offset, lfo.anchor); offset += 4;
-		write_float_be<float>(output_buffer + offset, lfo.scale); offset += 4;
+		write_float_be<float>(output_buffer + offset, lfo.rate);
+		offset += 4;
+		write_float_be<float>(output_buffer + offset, lfo.anchor);
+		offset += 4;
+		write_float_be<float>(output_buffer + offset, lfo.scale);
+		offset += 4;
 		output_buffer[offset++] = lfo.osc;
-		std::memcpy(output_buffer + offset, lfo.param_id.c_str(), lfo.param_id.length() + 1); offset += lfo.param_id.length() + 1;
+		std::memcpy(output_buffer + offset, lfo.param_id.c_str(), lfo.param_id.length() + 1);
+		offset += lfo.param_id.length() + 1;
 	}
 
 	const uint8_t name_len = std::strlen(m_player->get_id()) + 1;
-	std::memcpy(output_buffer + offset, m_player->get_id(), name_len); offset += name_len;
+	std::memcpy(output_buffer + offset, m_player->get_id(), name_len);
+	offset += name_len;
 
 	m_player->store(output_buffer + offset, store_reference);
 }
@@ -84,29 +112,38 @@ void ModLFO::load(const uint8_t *input_buffer) {
 
 		lfo.bpm_synced = input_buffer[offset++];
 		lfo.reversed = input_buffer[offset++];
-		lfo.rate = read_float_be<float>(input_buffer + offset); offset += 4;
-		lfo.anchor = read_float_be<float>(input_buffer + offset); offset += 4;
-		lfo.scale = read_float_be<float>(input_buffer + offset); offset += 4;
+		lfo.rate = read_float_be<float>(input_buffer + offset);
+		offset += 4;
+		lfo.anchor = read_float_be<float>(input_buffer + offset);
+		offset += 4;
+		lfo.scale = read_float_be<float>(input_buffer + offset);
+		offset += 4;
 		lfo.osc = static_cast<BasicOscillator>(input_buffer[offset++]);
 
-		lfo.param_id = std::string(reinterpret_cast<const char*>(input_buffer + offset));
+		lfo.param_id = std::string(reinterpret_cast<const char *>(input_buffer + offset));
 		offset += lfo.param_id.length() + 1;
 
 		m_lfos.push_back(lfo);
 	}
 
-	const std::string player_id{reinterpret_cast<const char*>(input_buffer + offset)};
+	const std::string player_id{reinterpret_cast<const char *>(input_buffer + offset)};
 	offset += player_id.length() + 1;
-	try {set_wrapped_player(load_player_by_id(player_id));} catch (const std::exception &e) {ysbp_show_error(get_error_source(), (std::string("Error loading wrapped player:\n") + e.what()).c_str()); return;}
-	if (!m_player) {ysbp_show_error(get_error_source(), "Player is nullptr"); return;}
+	try {
+		set_wrapped_player(load_player_by_id(player_id));
+	} catch (const std::exception &e) {
+		ysbp_show_error(get_error_source(), (std::string("Error loading wrapped player:\n") + e.what()).c_str());
+		return;
+	}
+	if (!m_player) {
+		ysbp_show_error(get_error_source(), "Player is nullptr");
+		return;
+	}
 
 	m_player->load(input_buffer + offset);
 }
 
-void ModLFO::render_graphics(YS_ImContextHandle im_context) {
-	m_player->render_graphics(im_context);
-
-	ImGui::SetCurrentContext(static_cast<ImGuiContext*>(im_context));
+void ModLFO::render_graphics() {
+	m_player->render_graphics();
 
 	ImGui::Spacing();
 	ImGui::Separator();
@@ -129,23 +166,28 @@ void ModLFO::render_graphics(YS_ImContextHandle im_context) {
 	ImGui::SameLine();
 
 	ImGui::SetNextItemWidth(26.f);
-	ImGui::DragInt("Render Chunk Size", reinterpret_cast<int*>(&m_render_chunk_size), 1, 1, 64, "%d", ImGuiSliderFlags_ClampOnInput);
+	ImGui::DragInt("Render Chunk Size", reinterpret_cast<int *>(&m_render_chunk_size), 1, 1, 64, "%d",
+				   ImGuiSliderFlags_ClampOnInput);
 	if (ImGui::IsItemHovered()) {
 		ImGui::BeginTooltip();
-		ImGui::Text("LFO parameters are applied when audio is rendered.\nTo achieve this, audio is rendered in smaller chunks.\nLower = Smoother LFO\nHigher = Faster Rendering");
+		ImGui::Text("LFO parameters are applied when audio is rendered.\nTo achieve this, audio is rendered in smaller "
+					"chunks.\nLower = Smoother LFO\nHigher = Faster Rendering");
 		ImGui::EndTooltip();
 	}
 
-	ImGui::BeginChild("##lfos", ImVec2(ImGui::GetContentRegionAvail().x, 220.f), 0, ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar | ImGuiWindowFlags_NoTitleBar);
+	ImGui::BeginChild("##lfos", ImVec2(ImGui::GetContentRegionAvail().x, 220.f), 0,
+					  ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar |
+						  ImGuiWindowFlags_NoTitleBar);
 
-	std::vector<const char*> params(m_player->get_parameter_count());
+	std::vector<const char *> params(m_player->get_parameter_count());
 	m_player->get_parameters(params.data());
 
 	uint8_t i = 0;
 	for (auto lfo = m_lfos.begin(); lfo != m_lfos.end(); i++) {
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(36.f / 255.f, 36.f / 255.f, 36.f / 255.f, 1.f));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(10.f, 10.f));
-		ImGui::BeginChild(("##lfo_" + std::to_string(i)).c_str(), ImVec2(200.f, 200.f), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoDecoration);
+		ImGui::BeginChild(("##lfo_" + std::to_string(i)).c_str(), ImVec2(200.f, 200.f), ImGuiChildFlags_Borders,
+						  ImGuiWindowFlags_NoDecoration);
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor();
 
@@ -218,9 +260,9 @@ void ModLFO::reset() {
 void ModLFO::p_apply_lfos() const {
 	for (const LFOInfo &lfo : m_lfos) {
 		if (lfo.bpm_synced) continue;
-		const float value = lfo.reversed ?
-			lfo.anchor + (1.f - calculate_basic_osc(lfo.osc, m_time_position * lfo.rate)) * lfo.scale
-				: lfo.anchor + calculate_basic_osc(lfo.osc, m_time_position * lfo.rate) * lfo.scale;
+		const float value =
+			lfo.reversed ? lfo.anchor + (1.f - calculate_basic_osc(lfo.osc, m_time_position * lfo.rate)) * lfo.scale
+						 : lfo.anchor + calculate_basic_osc(lfo.osc, m_time_position * lfo.rate) * lfo.scale;
 		m_player->set_parameter(lfo.param_id.c_str(), value);
 	}
 }

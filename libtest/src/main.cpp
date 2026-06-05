@@ -281,7 +281,7 @@ int main(int argv, char *argc[]) {
 		if (bin_player_loading) {
 			ImGui::Text("Loading Player State...");
 		} else {
-			bin_player->render_graphics(ImGui::GetCurrentContext());
+			bin_player->render_graphics();
 
 			ImGui::Spacing();
 			ImGui::Separator();

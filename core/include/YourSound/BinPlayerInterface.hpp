@@ -23,7 +23,7 @@ YS_CORE_EXPORT inline void ysbp_player_set_parameter(YS_PlayerHandle player, con
 YS_CORE_EXPORT inline void ysbp_player_get_parameters(YS_PlayerHandle player, const char **buffer) {static_cast<YourSound::Player*>(player)->get_parameters(buffer);}
 YS_CORE_EXPORT inline uint8_t ysbp_player_get_parameter_count(YS_PlayerHandle player) {return static_cast<YourSound::Player*>(player)->get_parameter_count();}
 
-YS_CORE_EXPORT inline void ysbp_player_render_graphics(YS_PlayerHandle player, YS_ImContextHandle im_context) {static_cast<YourSound::Player*>(player)->render_graphics(im_context);}
+YS_CORE_EXPORT inline void ysbp_player_render_graphics(YS_PlayerHandle player) {static_cast<YourSound::Player*>(player)->render_graphics();}
 
 YS_CORE_EXPORT inline void ysbp_player_reset(YS_PlayerHandle player) {static_cast<YourSound::Player*>(player)->reset();}
 

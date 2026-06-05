@@ -1,3 +1,7 @@
+if(YS_SANITIZE_ADDRESS)
+
+endif()
+
 add_subdirectory(JUCE)
 
 add_subdirectory(dr_libs)
@@ -56,7 +60,7 @@ target_include_directories(ImGui_Plugin PUBLIC
 	imgui_club/imgui_memory_editor
 )
 
-add_library(ImGui_Player STATIC
+add_library(ImGui_Core STATIC
 	ImGui/imgui.cpp
 	ImGui/imgui_draw.cpp
 	ImGui/imgui_tables.cpp
@@ -67,8 +71,8 @@ add_library(ImGui_Player STATIC
 	imgui-knobs/imgui-knobs.cpp
 )
 
-target_compile_definitions(ImGui_Player PUBLIC IMGUI_USER_CONFIG="CustomImConfig.h")
-target_include_directories(ImGui_Player PUBLIC
+target_compile_definitions(ImGui_Core PUBLIC IMGUI_USER_CONFIG="CustomImConfig.h")
+target_include_directories(ImGui_Core PUBLIC
 	ImGui
 	ImGui/misc/cpp
 	ImGuiConfig

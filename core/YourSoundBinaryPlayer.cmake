@@ -20,7 +20,7 @@ function(add_yoursound_binary_player TARGET_NAME)
 	target_include_directories(${TARGET_NAME} PRIVATE ${YSBP_YS_ROOT}/include)
 	target_compile_definitions(${TARGET_NAME} PRIVATE YS_IN_BIN_PLAYER_BUILD)
 	target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
-	target_link_libraries(${TARGET_NAME} PRIVATE YourSound ImGui_Player)
+	target_link_libraries(${TARGET_NAME} PRIVATE YourSound)
 
 	message(STATUS "Added YourSound binary player: ${TARGET_NAME}")
 endfunction()

@@ -84,12 +84,12 @@ static void SDLCALL callback_dll(void *userdata, const char *const *filelist, in
 	chosen_dll = true;
 
 	YourSound::BinPlayer::set_error_func(yoursound_error_callback);
-	YourSound::BinPlayer::register_player("org.yoursoftware.sound.sampler", [] {
-		return YourSound::load_binary_player(binplayer_dll_path, "org.yoursoftware.sound.sampler");
+	YourSound::BinPlayer::register_player("org.yoursoftware.sound.hexwave", [] {
+		return YourSound::load_binary_player(binplayer_dll_path, "org.yoursoftware.sound.hexwave");
 	});
 
 	try {
-		bin_player = YourSound::load_player_by_id("org.yoursoftware.sound.sampler");
+		bin_player = YourSound::load_player_by_id("org.yoursoftware.sound.hexwave");
 		bin_player_ref = &bin_player;
 
 		bin_player->set_bpm(120);
@@ -256,7 +256,7 @@ int main(int argv, char *argc[]) {
 
 		ImGui::Begin("Sample Player");
 
-		if (!bin_player_loading) bin_player->render_graphics(ImGui::GetCurrentContext());
+		if (!bin_player_loading) bin_player->render_graphics();
 		ImGui_PianoKeyboard("Piano", ImVec2(1024, 100), &prev_note_active, 21, 108, piano_callback, bin_player);
 
 		ImGui::End();

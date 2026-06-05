@@ -27,7 +27,7 @@ class BinPlayerHexwave : public YourSound::Player {
 
 		void reset() override;
 
-		void render_graphics(YS_ImContextHandle im_context) override;
+		void render_graphics() override;
 
 		const char *get_id() const override {return "org.yoursoftware.sound.hexwave";}
 	private:

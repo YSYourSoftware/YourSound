@@ -1,5 +1,28 @@
 #include "YourSound/IntegratedPlayers/BasicOSCPlayer.hpp"
 
+#include <imgui.h>
+
+using namespace YourSound::BinPlayer;
+
+static void imgui_basic_oscillator_dropdown(BasicOscillator *osc, const char *label) {
+	uint8_t current = *osc;
+
+	const char *osc_names[5] = {"Square", "Triangle", "Sine", "Sawtooth", "Noise"};
+
+	if (ImGui::BeginCombo(label, osc_names[current])) {
+		for (uint16_t i = 0; i < 5; i++) {
+			const bool is_selected = i == current;
+
+			if (ImGui::Selectable(osc_names[i], is_selected)) current = i;
+			if (is_selected) ImGui::SetItemDefaultFocus();
+		}
+
+		ImGui::EndCombo();
+	}
+
+	*osc = static_cast<BasicOscillator>(current);
+}
+
 using namespace YourSound::BinPlayer::Integrated;
 
 void BasicOSCPlayer::render(float *output_buffer, const uint16_t number_samples) {
@@ -32,9 +55,7 @@ void BasicOSCPlayer::set_parameter(const char *param_id, const float value) {
 	else if (std::strcmp(param_id, "_pitch_bend")) m_pitch_bend = value * 2.f - 1.f;
 }
 
-void BasicOSCPlayer::render_graphics(const YS_ImContextHandle im_context) {
-	ImGui::SetCurrentContext(static_cast<ImGuiContext*>(im_context));
-
+void BasicOSCPlayer::render_graphics() {
 	ImGui::Text("OSC");
 	ImGui::SameLine();
 	imgui_basic_oscillator_dropdown(&m_osc, "##osc");

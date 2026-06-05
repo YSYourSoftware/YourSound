@@ -1,0 +1,21 @@
+{
+	"name": "ys-your-sound",
+	"version-string": "1.0.0",
+	"license": "WTFPL",
+	"dependencies": [
+		"bzip2",
+		"dirent",
+		"getopt",
+		{
+			"name": "gmp",
+			"platform": "!windows"
+		},
+		"json-c",
+		{
+			"name": "mpir",
+			"platform": "windows"
+		},
+		"zlib",
+		"openssl"
+	]
+}

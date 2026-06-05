@@ -32,7 +32,7 @@ class BinPlayerSF2 : public YourSound::Player {
 
 		void reset() override;
 
-		void render_graphics(YS_ImContextHandle im_context) override;
+		void render_graphics() override;
 
 		void sf2_load_from_file(const char *filepath);
 

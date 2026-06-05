@@ -7,4 +7,6 @@ installer/win/temp/
 .idea/
 .vscode/
 
+vcpkg_installed/
+
 *.yslib

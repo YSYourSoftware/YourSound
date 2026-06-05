@@ -53,7 +53,7 @@ void PlayerInterface::set_parameter(const char *param_id, const float value) {m_
 void PlayerInterface::get_parameters(const char **buffer) const {m_player_api.get_parameters(m_player_handle, buffer);}
 uint8_t PlayerInterface::get_parameter_count() const {return m_player_api.get_parameter_count(m_player_handle);}
 
-void PlayerInterface::render_graphics(YS_ImContextHandle im_context) {m_player_api.render_graphics(m_player_handle, im_context);}
+void PlayerInterface::render_graphics() {m_player_api.render_graphics(m_player_handle);}
 
 void PlayerInterface::reset() {m_player_api.reset(m_player_handle);}
 

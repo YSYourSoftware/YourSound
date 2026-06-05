@@ -21,7 +21,6 @@
 typedef void *YS_ResourceHandle;
 typedef void *YS_PlayerHandle;
 typedef void *YS_PlayerWrapperHandle;
-typedef void *YS_ImContextHandle;
 
 namespace YourSound {
 	SARC_ADD_RUNTIME_ERROR(invalid_binary_player);
@@ -48,7 +47,7 @@ namespace YourSound {
 		using get_parameters_t = void(*)(YS_PlayerHandle, const char**);
 		using get_parameter_count_t = uint8_t(*)(YS_PlayerHandle);
 
-		using render_graphics_t = void(*)(YS_PlayerHandle, YS_ImContextHandle);
+		using render_graphics_t = void(*)(YS_PlayerHandle);
 
 		using reset_t = void(*)(YS_PlayerHandle);
 
@@ -97,7 +96,7 @@ namespace YourSound {
 			virtual void get_parameters(const char **buffer) const = 0;
 			[[nodiscard]] virtual uint8_t get_parameter_count() const = 0;
 
-			virtual void render_graphics(YS_ImContextHandle im_context) = 0;
+			virtual void render_graphics() = 0;
 
 			virtual void reset() = 0;
 
@@ -130,7 +129,7 @@ namespace YourSound {
 			void get_parameters(const char **buffer) const override;
 			[[nodiscard]] uint8_t get_parameter_count() const override;
 
-			void render_graphics(YS_ImContextHandle im_context) override;
+			void render_graphics() override;
 
 			void reset() override;
 
@@ -161,7 +160,7 @@ namespace YourSound {
 			friend YS_CORE_EXPORT_NO_EXTERN void free_binary_player(const PlayerInterface *binary_player);
 	};
 
-	class YS_CORE_EXPORT_NO_EXTERN PlayerWrapperInterface : public PlayerWrapper, public PlayerInterface {
+	class PlayerWrapperInterface : public PlayerWrapper, public PlayerInterface {
 		PlayerWrapperInterface(YS_PlayerWrapperHandle player_wrapper_handle, const std::filesystem::path &dll_path);
 	};
 
