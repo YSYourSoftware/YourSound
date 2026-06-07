@@ -14,34 +14,71 @@
 #define YS_EXTERN_EXPORT extern "C"
 #endif
 
-#define YS_START_BP_REGISTRY \
-	YS_EXTERN_EXPORT void player_note_on(YS_PlayerHandle player, const uint8_t midi_note_number, float velocity) {static_cast<YourSound::Player*>(player)->note_on(midi_note_number, velocity);} \
-	YS_EXTERN_EXPORT void player_note_off(YS_PlayerHandle player, const uint8_t midi_note_number) {static_cast<YourSound::Player*>(player)->note_off(midi_note_number);} \
-	\
-	YS_EXTERN_EXPORT void player_render(YS_PlayerHandle player, float *output_buffer, const uint16_t number_samples) {static_cast<YourSound::Player*>(player)->render(output_buffer, number_samples);} \
-	\
-	YS_EXTERN_EXPORT uint64_t player_store_calc_size(YS_PlayerHandle player, const bool store_reference) {return static_cast<YourSound::Player*>(player)->store_calc_size(store_reference);} \
-	YS_EXTERN_EXPORT void player_store(YS_PlayerHandle player, uint8_t *output_buffer, const bool store_reference) {static_cast<YourSound::Player*>(player)->store(output_buffer, store_reference);} \
-	YS_EXTERN_EXPORT void player_load(YS_PlayerHandle player, const uint8_t *input_buffer) {static_cast<YourSound::Player*>(player)->load(input_buffer);} \
-	\
-	YS_EXTERN_EXPORT void player_set_bpm(YS_PlayerHandle player, const uint16_t value) {static_cast<YourSound::Player*>(player)->set_bpm(value);} \
-	YS_EXTERN_EXPORT void player_set_sample_rate(YS_PlayerHandle player, const uint32_t value) {static_cast<YourSound::Player*>(player)->set_sample_rate(value);} \
-	\
-	YS_EXTERN_EXPORT void player_set_parameter(YS_PlayerHandle player, const char *param_id, float value) {static_cast<YourSound::Player*>(player)->set_parameter(param_id, value);} \
-	YS_EXTERN_EXPORT void player_get_parameters(YS_PlayerHandle player, const char **buffer) {static_cast<YourSound::Player*>(player)->get_parameters(buffer);} \
-	YS_EXTERN_EXPORT uint8_t player_get_parameter_count(YS_PlayerHandle player) {return static_cast<YourSound::Player*>(player)->get_parameter_count();} \
-	\
-	YS_EXTERN_EXPORT void player_render_graphics(YS_PlayerHandle player) {static_cast<YourSound::Player*>(player)->render_graphics();} \
-	\
-	YS_EXTERN_EXPORT void player_reset(YS_PlayerHandle player) {static_cast<YourSound::Player*>(player)->reset();} \
-	\
-	YS_EXTERN_EXPORT const char *player_get_id(YS_PlayerHandle player) {return static_cast<YourSound::Player*>(player)->get_id();} \
-	\
-	YS_EXTERN_EXPORT void destroy_bin_player(YS_PlayerHandle player) {delete static_cast<YourSound::Player*>(player);} \
-	YS_EXTERN_EXPORT uint32_t get_api_version() {return YS_API_VERSION;} \
-	YS_EXTERN_EXPORT YS_PlayerHandle create_bin_player(const char *id) {if (!id) return nullptr;
-#define YS_REGISTER_BP(bp_id, bp_class) if (std::strcmp(id, bp_id) == 0) {return new bp_class();}
-#define YS_END_BP_REGISTRY return nullptr;}
+#define YS_START_BP_REGISTRY                                                                                           \
+	YS_EXTERN_EXPORT void player_note_on(YS_PlayerHandle player, const uint8_t midi_note_number, float velocity) {     \
+		static_cast<YourSound::Player *>(player)->note_on(midi_note_number, velocity);                                 \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT void player_note_off(YS_PlayerHandle player, const uint8_t midi_note_number) {                    \
+		static_cast<YourSound::Player *>(player)->note_off(midi_note_number);                                          \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT void player_render(YS_PlayerHandle player, float *output_buffer, const uint16_t number_samples) { \
+		static_cast<YourSound::Player *>(player)->render(output_buffer, number_samples);                               \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT uint64_t player_store_calc_size(YS_PlayerHandle player, const bool store_reference) {             \
+		return static_cast<YourSound::Player *>(player)->store_calc_size(store_reference);                             \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT void player_store(YS_PlayerHandle player, uint8_t *output_buffer, const bool store_reference) {   \
+		static_cast<YourSound::Player *>(player)->store(output_buffer, store_reference);                               \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT void player_load(YS_PlayerHandle player, const uint8_t *input_buffer) {                           \
+		static_cast<YourSound::Player *>(player)->load(input_buffer);                                                  \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT void player_set_bpm(YS_PlayerHandle player, const uint16_t value) {                               \
+		static_cast<YourSound::Player *>(player)->set_bpm(value);                                                      \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT void player_set_sample_rate(YS_PlayerHandle player, const uint32_t value) {                       \
+		static_cast<YourSound::Player *>(player)->set_sample_rate(value);                                              \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT void player_set_parameter(YS_PlayerHandle player, const char *param_id, float value) {            \
+		static_cast<YourSound::Player *>(player)->set_parameter(param_id, value);                                      \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT void player_get_parameters(YS_PlayerHandle player, const char **buffer) {                         \
+		static_cast<YourSound::Player *>(player)->get_parameters(buffer);                                              \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT uint8_t player_get_parameter_count(YS_PlayerHandle player) {                                      \
+		return static_cast<YourSound::Player *>(player)->get_parameter_count();                                        \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT void player_render_graphics(YS_PlayerHandle player) {                                             \
+		static_cast<YourSound::Player *>(player)->render_graphics();                                                   \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT void player_reset(YS_PlayerHandle player) { static_cast<YourSound::Player *>(player)->reset(); }  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT const char *player_get_id(YS_PlayerHandle player) {                                               \
+		return static_cast<YourSound::Player *>(player)->get_id();                                                     \
+	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT void destroy_bin_player(YS_PlayerHandle player) {                                                 \
+		delete static_cast<YourSound::Player *>(player);                                                               \
+	}                                                                                                                  \
+	YS_EXTERN_EXPORT uint32_t get_api_version() { return YS_API_VERSION; }                                             \
+	YS_EXTERN_EXPORT YS_PlayerHandle create_bin_player(const char *id) {                                               \
+		if (!id) return nullptr;
+#define YS_REGISTER_BP(bp_id, bp_class)                                                                                \
+	if (std::strcmp(id, bp_id) == 0) { return new bp_class(); }
+#define YS_END_BP_REGISTRY                                                                                             \
+	return nullptr;                                                                                                    \
+	}
+
+#define YS_RUNTIME_ASSERT(condition, error_type, message)                                                              \
+	do {                                                                                                               \
+		if (!(condition)) throw error_type(message);                                                                   \
+	} while (0)
 
 namespace YourSound {
 	struct ErrorSource {
@@ -59,18 +96,13 @@ namespace YourSound {
 
 		return result;
 	}
-}
+} // namespace YourSound
 
 namespace YourSound::BinPlayer {
-	enum BasicOscillator : uint8_t {
-		SQUARE = 0,
-		TRIANGLE = 1,
-		SINE = 2,
-		SAWTOOTH = 3,
-		NOISE = 4
-	};
+	enum BasicOscillator : uint8_t { SQUARE = 0, TRIANGLE = 1, SINE = 2, SAWTOOTH = 3, NOISE = 4 };
 
-	[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f, const float tuning = 440.f) {
+	[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f,
+											const float tuning = 440.f) {
 		const float semis = (static_cast<float>(midi_note) - 69.f) + pitch_bend * 2.f;
 		return tuning * std::exp2f(semis / 12.f);
 	}
@@ -79,16 +111,11 @@ namespace YourSound::BinPlayer {
 		time = time - std::floorf(time);
 
 		switch (osc) {
-			case SQUARE:
-				return (time < 0.5f) ? 1.0f : 0.0f;
-			case TRIANGLE:
-				return (time < 0.5f) ? (time * 2.0f) : (2.0f - 2.0f * time);
-			case SINE:
-				return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi) + 1.0f);
-			case SAWTOOTH:
-				return time;
-			case NOISE:
-				return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+		case SQUARE: return (time < 0.5f) ? 1.0f : 0.0f;
+		case TRIANGLE: return (time < 0.5f) ? (time * 2.0f) : (2.0f - 2.0f * time);
+		case SINE: return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi) + 1.0f);
+		case SAWTOOTH: return time;
+		case NOISE: return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
 		}
 
 		return 0.f;
@@ -100,9 +127,9 @@ namespace YourSound::BinPlayer {
 	}
 
 	inline void mono_to_stereo(const float *mono_array, float *stereo_array, const uint16_t samples) {
-		for (uint16_t i = 0; i < samples; i += 2) {
-			stereo_array[i] = mono_array[i];
-			stereo_array[i + 1] = mono_array[i];
+		for (uint16_t i = 0; i < samples; ++i) {
+			stereo_array[i * 2] = mono_array[i];
+			stereo_array[(i * 2) + 1] = mono_array[i];
 		}
 	}
-}
+} // namespace YourSound::BinPlayer

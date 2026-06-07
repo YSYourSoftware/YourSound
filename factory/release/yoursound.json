@@ -43,30 +43,6 @@
 			"sharedLibraryKey": "all",
 			"name": "HexWave Player",
 			"frontFacing": true
-		}, {
-			"id": "org.yoursoftware.sound.emu-emulator-x",
-			"sharedLibraryKey": "all",
-			"name": "E-MU Emulator X Player",
-			"frontFacing": false,
-			"actions": [
-				{
-					"symbol": "action_import_exb",
-					"pass": [
-						{
-							"type": "filepath",
-							"extensions": [{"name": "Emulator X Bank Files", "extension": "exb"}]
-						}
-					], "name": "Import EXB..."
-				}, {
-					"symbol": "action_load_exb",
-					"pass": [
-						{
-							"type": "filepath",
-							"extensions": [{"name": "Emulator X Bank Files", "extension": "exb"}]
-						}, {"type": "rack"}
-					], "name": "Load EXB..."
-				}
-			]
 		}
 	], "binPlayerCompat": [
 		"windows",

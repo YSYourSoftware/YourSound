@@ -2,14 +2,16 @@ if(YS_SANITIZE_ADDRESS)
 
 endif()
 
-add_subdirectory(JUCE)
+if(YS_BUILD_PLUGIN)
+	add_subdirectory(JUCE)
+	add_subdirectory(imgui_juce)
+endif()
 
 add_subdirectory(dr_libs)
-add_subdirectory(imgui_juce)
+
 add_subdirectory(json)
 add_subdirectory(SArc)
 add_subdirectory(SDL EXCLUDE_FROM_ALL)
-add_subdirectory(utfcpp)
 
 add_library(ImGui_SDL3 STATIC
 	ImGui/imgui.cpp

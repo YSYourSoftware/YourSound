@@ -16,6 +16,13 @@ project(YourSound
 	LANGUAGES CXX
 )
 
+if(MSVC)
+	add_compile_options($<$<CONFIG:Debug>:/fsanitize=address>)
+elseif(GCC OR CLANG)
+	add_compile_options($<$<CONFIG:Debug>:-fsanitize=address>)
+	add_link_options($<$<CONFIG:Debug>:-fsanitize=address>)
+endif()
+
 option(YS_BUILD_PLUGIN "Build Plugin" OFF)
 option(YS_BUILD_INSTALL "Build Application installer and Library Manager" OFF)
 option(YS_BUILD_FACTORY "Build Factory Binary Players" OFF)

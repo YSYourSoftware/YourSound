@@ -4,6 +4,7 @@
 #include <YourSound/IntegratedPlayers/BasicOSCPlayer.hpp>
 #include <YourSound/IntegratedPlayers/ModLFO.hpp>
 #include <YourSound/Player.hpp>
+#include <YourSound/UI/Controls.hpp>
 #include <YourSound/UI/Fonts.hpp>
 
 #include <ImGuiPianoKeyboard.hpp>
@@ -19,33 +20,32 @@
 #include <mutex>
 #include <stacktrace>
 
-constexpr uint16_t BUFFER_SIZE = 2048;
-constexpr uint32_t SAMPLE_RATE = 32000;
-const char *PLAYER_ID = "org.yoursoftware.sound.hexwave";
+constexpr uint16_t BUFFER_SIZE = 64;
+constexpr uint32_t SAMPLE_RATE = 48000;
+constexpr auto PLAYER_ID = "org.yoursoftware.sound.hexwave";
 
 constexpr SDL_AudioSpec AUDIO_SPEC = {SDL_AUDIO_F32, 2, SAMPLE_RATE};
 
 int32_t prev_note_active = -1;
 
-float *output_buffer = new float[BUFFER_SIZE * 2];
+auto output_buffer = new float[BUFFER_SIZE * 2 /* x2 for stereo */];
 float param_value = 0.f;
 float pitch_wheel = 0.5f;
 float mod_wheel = 0.f;
 
-bool *keys_pressed = new bool[128]{};
+auto keys_pressed = new bool[128]{};
 bool run_main_loop = true;
 bool show_param_edit = false;
 bool bin_player_loading = true;
 
-const char *param_edit_id = new char[32];
+const char *param_edit_id = nullptr;
 
 YourSound::Player *bin_player = nullptr;
-YourSound::Player **bin_player_ref = &bin_player;
 
 std::mutex bin_player_mutex;
 
 bool piano_callback(void *data, const int message, const int key, const float velocity) {
-	if (key >= 128) return false;
+	if (key >= 128 || key < 0) return false;
 	if (message == NoteGetStatus) return keys_pressed[key];
 
 	if (message == NoteOn) {
@@ -86,9 +86,9 @@ static void SDLCALL load_callback(void *userdata, const char *const *filelist, i
 	uint8_t data_start_index = 0;
 
 	try {
-		SARC_RUNTIME_ASSERT(std::memcmp(input_buffer, "YSPP", 4) == 0, std::runtime_error, "YSPP magic missing");
+		YS_RUNTIME_ASSERT(std::memcmp(input_buffer, "YSPP", 4) == 0, std::runtime_error, "YSPP magic missing");
 		data_start_index = std::strlen(reinterpret_cast<char const *>(input_buffer + 4)) + 1 + 4;
-		char *buffer = new char[std::strlen(reinterpret_cast<char const *>(input_buffer + 4)) + 1];
+		auto buffer = new char[std::strlen(reinterpret_cast<char const *>(input_buffer + 4)) + 1];
 		std::memcpy(buffer, input_buffer + 4, std::strlen(reinterpret_cast<char const *>(input_buffer + 4)) + 1);
 		const std::string player_id{buffer};
 		delete[] buffer;
@@ -147,16 +147,21 @@ void save_state(const bool store_reference, const YourSound::Player *player) {
 	delete[] buffer;
 }
 
-void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, const int additional_amount, int total_amount) {
+void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, int additional_amount, int total_amount) {
 	if (bin_player_loading) return;
 	if (additional_amount < 1) return;
 
-	std::lock_guard bin_player_lock(bin_player_mutex);
+	int frames = additional_amount / 8;
 
-	const auto player = *static_cast<YourSound::Player **>(userdata);
-	player->render(output_buffer, additional_amount / (sizeof(float) * 2));
+	while (frames > 0) {
+		const int chunk = std::min(frames, static_cast<int>(BUFFER_SIZE));
 
-	SDL_PutAudioStreamData(stream, output_buffer, additional_amount);
+		bin_player->render(output_buffer, chunk);
+
+		SDL_PutAudioStreamData(stream, output_buffer, chunk * 8);
+
+		frames -= chunk;
+	}
 }
 
 int main(int argv, char *argc[]) {
@@ -212,8 +217,8 @@ int main(int argv, char *argc[]) {
 		YourSound::Player *bin_player_internal = YourSound::load_player_by_id(PLAYER_ID);
 		bin_player = bin_player_internal;
 
-		// bin_player = YourSound::load_player_wrapper_by_id("org.yoursoftware.sound.mod.lfo");
-		// dynamic_cast<YourSound::PlayerWrapper*>(bin_player)->set_wrapped_player(bin_player_internal);
+		//bin_player = YourSound::load_player_wrapper_by_id("org.yoursoftware.sound.mod.lfo");
+		//dynamic_cast<YourSound::PlayerWrapper *>(bin_player)->set_wrapped_player(bin_player_internal);
 	} catch (const std::exception &e) {
 		show_error(e.what());
 		return 1;
@@ -231,7 +236,7 @@ int main(int argv, char *argc[]) {
 	bin_player_loading = false;
 
 	SDL_AudioStream *audio_stream =
-		SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &AUDIO_SPEC, &audio_callback, bin_player_ref);
+		SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &AUDIO_SPEC, &audio_callback, nullptr);
 
 	if (!audio_stream) {
 		std::cerr << "Audio stream not opened" << std::endl;
@@ -242,6 +247,8 @@ int main(int argv, char *argc[]) {
 
 	constexpr SDL_DialogFileFilter yoursound_player_preset_filetype_filters[] = {{"YourSound Player Preset", "yspp"},
 																				 {"All Files", "*"}};
+
+	YourSound::UI::set_imgui_context(ImGui::GetCurrentContext());
 
 	while (run_main_loop) {
 		SDL_Event event;

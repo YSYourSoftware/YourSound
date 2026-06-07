@@ -8,6 +8,8 @@
 #include "MessageBox.hpp"
 #include "SmallPopups.hpp"
 
+#include "YourSound/Config.hpp"
+
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
@@ -48,7 +50,7 @@ static void SDLCALL callback_install(void *userdata, const char *const *filelist
 
 	// Ignore the clangd error you get on the line below.
 	try {
-		SArc::SArchiveFile *s_file = target_library->get_file_by_path("yoursound.json");
+		const SArc::SArchiveFile *s_file = target_library->get_file_by_path_const("yoursound.json");
 		target_library_info = nlohmann::json::parse(s_file->data);
 		delete s_file;
 	} catch (std::exception &e) {
@@ -65,9 +67,8 @@ static void SDLCALL callback_install(void *userdata, const char *const *filelist
 
 	try {
 		int width, height;
-		SArc::SArchiveFile *s_file = target_library->get_file_by_path("64.png");
-		load_texture_from_memory(s_file->data, &target_library_cover_64, width,
-								 height, renderer);
+		const SArc::SArchiveFile *s_file = target_library->get_file_by_path_const("64.png");
+		load_texture_from_memory(s_file->data, &target_library_cover_64, width, height, renderer);
 		delete s_file;
 		if (width != 64 || height != 64)
 			throw std::invalid_argument("Incorrect dimensions for 64.png (expected 64x64)");
@@ -130,6 +131,63 @@ int main(int argv, char *argc[]) {
 
 	std::string search_name;
 	std::string search_author;
+
+	struct library_info {
+		std::string name;
+		std::string author;
+		std::string description;
+		uint16_t version_major;
+		uint16_t version_minor;
+		uint16_t version_patch;
+		SDL_Texture *thumbnail;
+	};
+
+	std::vector<library_info> installed_libraries;
+
+	try {
+		for (const auto &library_id : YourSound::get_installed_libraries()) {
+			if (!YourSound::is_library_valid(library_id)) continue;
+
+			std::ifstream yoursound_json(YourSound::get_library_file_path(library_id, "yoursound.json"),
+										 std::ios::ate | std::ios::binary);
+			yoursound_json.exceptions(std::ios::failbit | std::ios::badbit);
+			const std::streamsize json_length = yoursound_json.tellg();
+			yoursound_json.seekg(0, std::ios::beg);
+
+			std::string json_string(json_length, '\xBA');
+			yoursound_json.read(json_string.data(), json_length);
+
+			target_library_info = nlohmann::json::parse(json_string);
+
+			throw_if_invalid_library_info();
+
+			SDL_Texture *lib_thumb = nullptr;
+
+			std::ifstream png_64(YourSound::get_library_file_path(library_id, "64.png"),
+								 std::ios::ate | std::ios::binary);
+			png_64.exceptions(std::ios::failbit | std::ios::badbit);
+			const std::streamsize png_64_length = png_64.tellg();
+			png_64.seekg(0, std::ios::beg);
+
+			SArc::bytes_t png_64_data(png_64_length);
+			png_64.read(reinterpret_cast<char *>(png_64_data.data()), png_64_length);
+
+			int width, height;
+			load_texture_from_memory(png_64_data, &lib_thumb, width, height, renderer);
+			if (width != 64 || height != 64)
+				throw std::invalid_argument("Incorrect dimensions for 64.png (expected 64x64)");
+
+			installed_libraries.push_back({.name = target_library_info["name"].get<std::string>(),
+										   .author = target_library_info["author"].get<std::string>(),
+										   .description = target_library_info["description"].get<std::string>(),
+										   .version_major = target_library_info["version"][0].get<uint16_t>(),
+										   .version_minor = target_library_info["version"][1].get<uint16_t>(),
+										   .version_patch = target_library_info["version"][2].get<uint16_t>(),
+										   .thumbnail = lib_thumb});
+		}
+	} catch (std::exception &e) {
+		show_warning("Failed to collect installed library information:\n" + std::string(e.what()));
+	}
 
 	constexpr ImGuiWindowFlags static_window_flags =
 		ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
@@ -231,6 +289,26 @@ int main(int argv, char *argc[]) {
 		ImGui::PushItemWidth(fullWidth * 0.5f);
 		ImGui::InputTextWithHint("##search_author", "Filter author...", &search_author);
 		ImGui::PopItemWidth();
+
+		for (const auto &library : installed_libraries) {
+			ImGui::Image(library.thumbnail, ImVec2(64, 64));
+
+			ImGui::SameLine();
+
+			ImGui::BeginGroup();
+			ImGui::PushFont(font_bold);
+			ImGui::Text(library.name.c_str());
+			ImGui::PopFont();
+
+			ImGui::Text(library.author.c_str());
+			ImGui::SameLine();
+			ImGui::PushFont(font_light);
+			ImGui::Text("v%i.%i.%i", library.version_major, library.version_minor, library.version_patch);
+			ImGui::PopFont();
+
+			ImGui::Text(library.description.c_str());
+			ImGui::EndGroup();
+		}
 
 		ImGui::End();
 

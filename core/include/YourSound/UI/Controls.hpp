@@ -78,3 +78,7 @@ YS_CORE_EXPORT bool ysbp_ui_begin_combo(const char *label, const char *preview_v
 YS_CORE_EXPORT bool ysbp_ui_combo_selectable(const char *label, bool selected, ysbp_ui_ImGuiSelectableFlags flags = 0);
 YS_CORE_EXPORT void ysbp_ui_combo_set_default_item_focus();
 YS_CORE_EXPORT void ysbp_ui_end_combo();
+
+namespace YourSound::UI {
+	YS_CORE_EXPORT_NO_EXTERN void set_imgui_context(void *im_context);
+}

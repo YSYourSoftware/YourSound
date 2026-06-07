@@ -40,3 +40,7 @@ bool ysbp_ui_combo_selectable(const char *label, const bool selected, const ysbp
 void ysbp_ui_combo_set_default_item_focus() { ImGui::SetItemDefaultFocus(); }
 void ysbp_ui_end_combo() { ImGui::EndCombo(); }
 }
+
+namespace YourSound::UI {
+	void set_imgui_context(void *im_context) { ImGui::SetCurrentContext(static_cast<ImGuiContext *>(im_context)); }
+} // namespace YourSound::UI

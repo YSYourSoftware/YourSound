@@ -33,14 +33,12 @@ void BinPlayerHexwave::render(float *output_buffer, const uint16_t number_sample
 		return;
 	}
 
-	auto *mono_buffer = new float[number_samples];
+	std::vector<float> mono_buffer(number_samples);
 
-	hexwave_generate_samples(mono_buffer, number_samples, m_hexwave,
+	hexwave_generate_samples(mono_buffer.data(), number_samples, m_hexwave,
 							 YourSound::BinPlayer::midi_to_freq(m_note_on, m_pitch_bend) / m_sample_rate);
-	YourSound::BinPlayer::scale_float_array(mono_buffer, number_samples * 2, m_note_velocity);
-	YourSound::BinPlayer::mono_to_stereo(mono_buffer, output_buffer, number_samples);
-
-	delete[] mono_buffer;
+	YourSound::BinPlayer::scale_float_array(mono_buffer.data(), number_samples, m_note_velocity);
+	YourSound::BinPlayer::mono_to_stereo(mono_buffer.data(), output_buffer, number_samples);
 }
 
 uint64_t BinPlayerHexwave::store_calc_size(bool store_reference) const { return 1 + 4 + 4 + 4; }

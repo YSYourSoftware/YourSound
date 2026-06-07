@@ -1,6 +1,6 @@
 Name "YourSound"
 
-OutFile "..\..\build\Install YourSound.exe"
+OutFile "..\..\build-release\Install YourSound.exe"
 BrandingText " "
 
 !define MUI_ICON ".\install.ico"

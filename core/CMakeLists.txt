@@ -9,14 +9,14 @@ target_compile_definitions(YourSound PRIVATE YS_IN_CORE_BUILD)
 target_compile_features(YourSound PUBLIC cxx_std_23)
 target_include_directories(YourSound PUBLIC
 	include
-	../lib/SArc/include
 	../lib/dr_libs
+	../lib/SArc/include
 )
 
-target_link_libraries(YourSound PRIVATE
+target_link_libraries(YourSound PUBLIC
 	dr_libs_interface
 	nlohmann_json
-	ImGui_Core
-PUBLIC
 	SArc
+	PRIVATE
+	ImGui_Core
 )

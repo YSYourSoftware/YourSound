@@ -22,5 +22,21 @@ function(add_yoursound_binary_player TARGET_NAME)
 	target_compile_features(${TARGET_NAME} PRIVATE cxx_std_23)
 	target_link_libraries(${TARGET_NAME} PRIVATE YourSound)
 
+	if(MSVC)
+		target_compile_options(${TARGET_NAME} PRIVATE
+			$<$<CONFIG:Debug>:/fsanitize=address>
+			$<$<CONFIG:Debug>:/Od>
+			$<$<CONFIG:Release>:/O2>
+		)
+		target_link_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Debug>:/fsanitize=address>)
+	elseif(GCC OR CLANG)
+		target_compile_options(${TARGET_NAME} PRIVATE
+			$<$<CONFIG:Debug>:-fsanitize=address>
+			$<$<CONFIG:Debug>:-O0>
+			$<$<CONFIG:Release>:-O2>
+		)
+		target_link_options(${TARGET_NAME} PRIVATE $<$<CONFIG:Debug>:-fsanitize=address>)
+	endif()
+
 	message(STATUS "Added YourSound binary player: ${TARGET_NAME}")
 endfunction()

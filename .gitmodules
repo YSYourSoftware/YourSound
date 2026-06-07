@@ -20,9 +20,6 @@
 [submodule "factory/binary/lib/TinySoundFont"]
 	path = factory/binary/lib/TinySoundFont
 	url = https://github.com/schellingb/TinySoundFont.git
-[submodule "lib/utfcpp"]
-	path = lib/utfcpp
-	url = https://github.com/nemtrif/utfcpp.git
 [submodule "factory/binary/lib/imgui-knobs"]
 	path = lib/imgui-knobs
 	url = https://github.com/altschuler/imgui-knobs.git
