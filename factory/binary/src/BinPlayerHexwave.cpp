@@ -41,8 +41,8 @@ void BinPlayerHexwave::render(float *output_buffer, const uint16_t number_sample
 	YourSound::BinPlayer::mono_to_stereo(mono_buffer.data(), output_buffer, number_samples);
 }
 
-uint64_t BinPlayerHexwave::store_calc_size(bool store_reference) const { return 1 + 4 + 4 + 4; }
-void BinPlayerHexwave::store(uint8_t *output_buffer, bool store_reference) const {
+uint64_t BinPlayerHexwave::store_calc_size(const bool store_reference) { return 1 + 4 + 4 + 4; }
+void BinPlayerHexwave::store(uint8_t *output_buffer, bool store_reference) {
 	output_buffer[0] = m_reflect;
 	YourSound::write_float_be<float>(output_buffer + 1, m_peak_time);
 	YourSound::write_float_be<float>(output_buffer + 5, m_half_height);
@@ -81,7 +81,7 @@ void BinPlayerHexwave::set_parameter(const char *param_id, const float value) {
 		m_pitch_bend = value * 2.f - 1.f;
 }
 
-void BinPlayerHexwave::get_parameters(const char **buffer) const {
+void BinPlayerHexwave::get_parameters(const char **buffer) {
 	buffer[0] = "reflect";
 	buffer[1] = "peak_time";
 	buffer[2] = "half_height";

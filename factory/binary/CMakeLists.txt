@@ -9,6 +9,7 @@ target_include_directories(binplayers PRIVATE
 
 target_sources(binplayers PUBLIC
 	src/BinPlayer.cpp
+	src/BinPlayer2A03.cpp
 	src/BinPlayerHexwave.cpp
 	src/BinPlayerSampler.cpp
 	src/BinPlayerSF2.cpp

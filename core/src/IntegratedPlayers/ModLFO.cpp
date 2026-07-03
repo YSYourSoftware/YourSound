@@ -59,7 +59,7 @@ void ModLFO::render(float *output_buffer, const uint16_t number_samples) {
 	}
 }
 
-uint64_t ModLFO::store_calc_size(const bool store_reference) const {
+uint64_t ModLFO::store_calc_size(const bool store_reference) {
 	constexpr uint8_t constant_per_lfo = 1 + // BPM Synced
 										 1 + // Reversed
 										 4 + // Rate
@@ -73,7 +73,7 @@ uint64_t ModLFO::store_calc_size(const bool store_reference) const {
 	return 1 + 1 + size + std::strlen(m_player->get_id()) + 1 + m_player->store_calc_size(store_reference);
 }
 
-void ModLFO::store(uint8_t *output_buffer, const bool store_reference) const {
+void ModLFO::store(uint8_t *output_buffer, bool store_reference) {
 	uint16_t offset = 0;
 
 	output_buffer[offset++] = m_render_chunk_size;

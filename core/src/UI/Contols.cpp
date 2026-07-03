@@ -1,5 +1,6 @@
 #include "YourSound/UI/Controls.hpp"
 
+#include <TextEditor.h>
 #include <imgui-knobs.h>
 #include <imgui.h>
 #include <imgui_memory_editor.h>

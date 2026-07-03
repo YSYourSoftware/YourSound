@@ -42,22 +42,22 @@ void PlayerInterface::note_off(const uint8_t midi_note_number) {m_player_api.not
 
 void PlayerInterface::render(float *output_buffer, const uint16_t number_samples) {m_player_api.render(m_player_handle, output_buffer, number_samples);}
 
-uint64_t PlayerInterface::store_calc_size(const bool store_reference) const {return m_player_api.store_calc_size(m_player_handle, store_reference);}
-void PlayerInterface::store(uint8_t *output_buffer, const bool store_reference) const {m_player_api.store(m_player_handle, output_buffer, store_reference);}
+uint64_t PlayerInterface::store_calc_size(const bool store_reference) {return m_player_api.store_calc_size(m_player_handle, store_reference);}
+void PlayerInterface::store(uint8_t *output_buffer, bool store_reference) {m_player_api.store(m_player_handle, output_buffer, store_reference);}
 void PlayerInterface::load(const uint8_t *input_buffer) {m_player_api.load(m_player_handle, input_buffer);}
 
 void PlayerInterface::set_bpm(const uint16_t value) {m_player_api.set_bpm(m_player_handle, value);}
 void PlayerInterface::set_sample_rate(const uint32_t value) {m_player_api.set_sample_rate(m_player_handle, value);}
 
 void PlayerInterface::set_parameter(const char *param_id, const float value) {m_player_api.set_parameter(m_player_handle, param_id, value);}
-void PlayerInterface::get_parameters(const char **buffer) const {m_player_api.get_parameters(m_player_handle, buffer);}
-uint8_t PlayerInterface::get_parameter_count() const {return m_player_api.get_parameter_count(m_player_handle);}
+void PlayerInterface::get_parameters(const char **buffer) {m_player_api.get_parameters(m_player_handle, buffer);}
+uint8_t PlayerInterface::get_parameter_count() {return m_player_api.get_parameter_count(m_player_handle);}
 
 void PlayerInterface::render_graphics() {m_player_api.render_graphics(m_player_handle);}
 
 void PlayerInterface::reset() {m_player_api.reset(m_player_handle);}
 
-const char *PlayerInterface::get_id() const {return m_player_api.get_id(m_player_handle);}
+const char *PlayerInterface::get_id() {return m_player_api.get_id(m_player_handle);}
 
 #ifdef _WIN32
 using get_api_version_fn = uint32_t(*)();

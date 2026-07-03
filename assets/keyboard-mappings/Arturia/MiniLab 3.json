@@ -1,0 +1,160 @@
+{
+	"script": "miniLab3.ljbc",
+	"controls": {
+		"pitchwheel": {
+			"type": "fader",
+			"bind": "pitchwheel",
+			"range": [0, 127],
+			"onInput": "forward:_pitch_wheel"
+		}, "modwheel": {
+			"type": "fader",
+			"bind": "cc:1",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "pad1": {
+			"type": "button",
+			"bind": "note:16_24",
+			"onInput": "scriptEvent"
+		}, "pad2": {
+			"type": "button",
+			"bind": "note:16_25",
+			"onInput": "scriptEvent"
+		}, "pad3": {
+			"type": "button",
+			"bind": "note:16_26",
+			"onInput": "scriptEvent"
+		}, "pad4": {
+			"type": "button",
+			"bind": "note:16_27",
+			"onInput": "scriptEvent"
+		}, "pad5": {
+			"type": "button",
+			"bind": "note:16_28",
+			"onInput": "scriptEvent"
+		}, "pad6": {
+			"type": "button",
+			"bind": "note:16_29",
+			"onInput": "scriptEvent"
+		}, "pad7": {
+			"type": "button",
+			"bind": "note:16_30",
+			"onInput": "scriptEvent"
+		}, "pad8": {
+			"type": "button",
+			"bind": "note:16_31",
+			"onInput": "scriptEvent"
+		}, "pad1_toggle": {
+			"type": "toggle",
+			"bind": "note:16_32",
+			"onInput": "scriptEvent"
+		}, "pad2_toggle": {
+			"type": "toggle",
+			"bind": "note:16_33",
+			"onInput": "scriptEvent"
+		}, "pad3_toggle": {
+			"type": "toggle",
+			"bind": "note:16_34",
+			"onInput": "scriptEvent"
+		}, "pad4_toggle": {
+			"type": "toggle",
+			"bind": "note:16_35",
+			"onInput": "scriptEvent"
+		}, "pad5_toggle": {
+			"type": "toggle",
+			"bind": "note:16_36",
+			"onInput": "scriptEvent"
+		}, "pad6_toggle": {
+			"type": "toggle",
+			"bind": "note:16_37",
+			"onInput": "scriptEvent"
+		}, "pad7_toggle": {
+			"type": "toggle",
+			"bind": "note:16_38",
+			"onInput": "scriptEvent"
+		}, "pad8_toggle": {
+			"type": "toggle",
+			"bind": "note:16_39",
+			"onInput": "scriptEvent"
+		}, "centralWheel": {
+			"type": "fader",
+			"bind": "cc:114",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "centralWheel_shift": {
+			"type": "fader",
+			"bind": "cc:112",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "centralWheel_click": {
+			"type": "button",
+			"bind": "cc:115",
+			"threshold": 64,
+			"onInput": "scriptEvent"
+		}, "centralWheel_click_shift": {
+			"type": "button",
+			"bind": "cc:113",
+			"threshold": 64,
+			"onInput": "scriptEvent"
+		}, "knob1": {
+			"type": "fader",
+			"bind": "cc:74",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob2": {
+			"type": "fader",
+			"bind": "cc:71",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob3": {
+			"type": "fader",
+			"bind": "cc:76",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob4": {
+			"type": "fader",
+			"bind": "cc:77",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob5": {
+			"type": "fader",
+			"bind": "cc:93",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob6": {
+			"type": "fader",
+			"bind": "cc:18",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob7": {
+			"type": "fader",
+			"bind": "cc:19",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "knob8": {
+			"type": "fader",
+			"bind": "cc:16",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "fader1": {
+			"type": "fader",
+			"bind": "cc:82",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "fader2": {
+			"type": "fader",
+			"bind": "cc:83",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "fader3": {
+			"type": "fader",
+			"bind": "cc:85",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}, "fader4": {
+			"type": "fader",
+			"bind": "cc:17",
+			"range": [0, 127],
+			"onInput": "scriptEvent"
+		}
+	}
+}

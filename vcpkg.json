@@ -16,6 +16,7 @@
 			"platform": "windows"
 		},
 		"zlib",
-		"openssl"
+		"openssl",
+		"luajit"
 	]
 }

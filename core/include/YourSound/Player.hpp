@@ -89,25 +89,25 @@ namespace YourSound {
 
 		virtual void render(float *output_buffer, uint16_t number_samples) = 0;
 
-		[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) const = 0;
-		virtual void store(uint8_t *output_buffer, bool store_reference) const = 0;
+		[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) = 0;
+		virtual void store(uint8_t *output_buffer, bool store_reference) = 0;
 		virtual void load(const uint8_t *input_buffer) = 0;
 
 		virtual void set_bpm(uint16_t value) = 0;
 		virtual void set_sample_rate(uint32_t value) = 0;
 
 		virtual void set_parameter(const char *param_id, float value) = 0;
-		virtual void get_parameters(const char **buffer) const = 0;
-		[[nodiscard]] virtual uint8_t get_parameter_count() const = 0;
+		virtual void get_parameters(const char **buffer) = 0;
+		[[nodiscard]] virtual uint8_t get_parameter_count() = 0;
 
 		virtual void render_graphics() = 0;
 
 		virtual void reset() = 0;
 
-		[[nodiscard]] virtual const char *get_id() const = 0;
+		[[nodiscard]] virtual const char *get_id() = 0;
 	};
 
-	class PlayerWrapper : public Player {
+	class PlayerWrapper : public virtual Player {
 	public:
 		virtual void set_wrapped_player(YS_PlayerHandle player) = 0;
 	};
@@ -122,22 +122,22 @@ namespace YourSound {
 
 		void render(float *output_buffer, uint16_t number_samples) override;
 
-		[[nodiscard]] uint64_t store_calc_size(bool store_reference) const override;
-		void store(uint8_t *output_buffer, bool store_reference) const override;
+		[[nodiscard]] uint64_t store_calc_size(const bool store_reference) override;
+		void store(uint8_t *output_buffer, bool store_reference) override;
 		void load(const uint8_t *input_buffer) override;
 
 		void set_bpm(uint16_t value) override;
 		void set_sample_rate(uint32_t value) override;
 
 		void set_parameter(const char *param_id, float value) override;
-		void get_parameters(const char **buffer) const override;
-		[[nodiscard]] uint8_t get_parameter_count() const override;
+		void get_parameters(const char **buffer) override;
+		[[nodiscard]] uint8_t get_parameter_count() override;
 
 		void render_graphics() override;
 
 		void reset() override;
 
-		[[nodiscard]] const char *get_id() const override;
+		[[nodiscard]] const char *get_id() override;
 	private:
 		template <typename Func> Func p_get_dll_func(const char *name) const {
 			static_assert(std::is_pointer_v<Func>, "Func must be a function pointer");
@@ -173,14 +173,14 @@ namespace YourSound {
 	public:
 		virtual ~Resource() = default;
 
-		[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) const = 0;
-		virtual void store(uint8_t *output_buffer, bool store_reference) const = 0;
+		[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) = 0;
+		virtual void store(uint8_t *output_buffer, bool store_reference) = 0;
 		virtual void load(const uint8_t *input_buffer) = 0;
 		virtual void reload_file() = 0;
 
 		void set_path(const std::filesystem::path &path) { m_path = path; }
 
-		size_t get_length() const { return m_data.size(); }
+		size_t get_length() { return m_data.size(); }
 
 		uint8_t *pointer() { return m_data.data(); }
 	protected:

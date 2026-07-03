@@ -5,8 +5,8 @@
 namespace YourSound {
 	class SampleResource : public Resource {
 		public:
-			[[nodiscard]] uint64_t store_calc_size(bool store_reference = true) const override;
-			void store(uint8_t *output_buffer, bool store_reference = true) const override;
+			[[nodiscard]] uint64_t store_calc_size(bool store_reference = true) override;
+			void store(uint8_t *output_buffer, bool store_reference = true) override;
 			void load(const uint8_t *input_buffer) override;
 
 			void reload_file() override;

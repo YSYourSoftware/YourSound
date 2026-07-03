@@ -32,3 +32,13 @@
 [submodule "factory/release/samples"]
 	path = factory/release/samples
 	url = https://git.yoursoftware.org/YourSoftware/YourSound-FactoryLibrarySamples.git
+[submodule "lib/ImGuiColorTextEdit"]
+	path = lib/ImGuiColorTextEdit
+	url = https://github.com/goossens/ImGuiColorTextEdit.git
+	branch = future
+[submodule "lib/sol2"]
+	path = lib/sol2
+	url = https://github.com/ThePhD/sol2.git
+[submodule "lib/freetype"]
+	path = lib/freetype
+	url = https://gitlab.freedesktop.org/freetype/freetype.git

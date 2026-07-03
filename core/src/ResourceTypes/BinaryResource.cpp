@@ -8,7 +8,7 @@
 
 using namespace YourSound;
 
-uint64_t BinaryResource::store_calc_size(const bool store_reference) const {
+uint64_t BinaryResource::store_calc_size(const bool store_reference) {
 	// data_embedded[1] + decompressed_data_length[8] + compressed_data_length[8] + compressed_data[?]
 	if (!store_reference || m_force_embedded) return 1 + 8 + 8 + SArc::helpers::lzma_get_compressed_size(std::span(reinterpret_cast<const std::byte*>(m_data.data()), m_data.size()), m_data.size());
 
@@ -16,7 +16,7 @@ uint64_t BinaryResource::store_calc_size(const bool store_reference) const {
 	return 1 + m_path.u8string().size() + 1;
 }
 
-void BinaryResource::store(uint8_t *output_buffer, const bool store_reference) const {
+void BinaryResource::store(uint8_t *output_buffer, bool store_reference) {
 	if (store_reference && !m_force_embedded) {
 		*output_buffer = 0;
 

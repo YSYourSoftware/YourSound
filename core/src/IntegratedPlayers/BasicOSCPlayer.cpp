@@ -43,7 +43,6 @@ void BasicOSCPlayer::render(float *output_buffer, const uint16_t number_samples)
 		output_buffer[i * 2 + 1] = sample;
 
 		m_phase += phase_increment;
-
 		if (m_phase >= 1.0f) m_phase -= 1.0f;
 	}
 

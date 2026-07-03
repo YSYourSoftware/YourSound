@@ -19,16 +19,16 @@ class BinPlayerSF2 : public YourSound::Player {
 
 		void render(float *output_buffer, uint16_t number_samples) override;
 
-		uint64_t store_calc_size(bool store_reference) const override;
-		void store(uint8_t *output_buffer, bool store_reference) const override;
+		uint64_t store_calc_size(const bool store_reference) override;
+		void store(uint8_t *output_buffer, bool store_reference) override;
 		void load(const uint8_t *input_buffer) override;
 
 		void set_bpm(uint16_t value) override {}
 		void set_sample_rate(uint32_t value) override;
 
 		void set_parameter(const char *param_id, const float value) override {if (std::strcmp(param_id, "_pitch_bend")) m_pitch_bend = value * 2.f - 1.f;}
-		void get_parameters(const char **buffer) const override {}
-		uint8_t get_parameter_count() const override {return 0;}
+		void get_parameters(const char **buffer) override {}
+		uint8_t get_parameter_count() override {return 0;}
 
 		void reset() override;
 
@@ -36,7 +36,7 @@ class BinPlayerSF2 : public YourSound::Player {
 
 		void sf2_load_from_file(const char *filepath);
 
-		const char *get_id() const override {return "org.yoursoftware.sound.sf2";}
+		const char *get_id() override {return "org.yoursoftware.sound.sf2";}
 	private:
 		YourSound::BinaryResource m_soundfont_resource;
 

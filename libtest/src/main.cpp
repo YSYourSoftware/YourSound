@@ -2,11 +2,13 @@
 
 #include <YourSound/BinPlayerRegistry.hpp>
 #include <YourSound/IntegratedPlayers/BasicOSCPlayer.hpp>
+#include <YourSound/IntegratedPlayers/LuaPlayers.hpp>
 #include <YourSound/IntegratedPlayers/ModLFO.hpp>
 #include <YourSound/Player.hpp>
 #include <YourSound/UI/Controls.hpp>
 #include <YourSound/UI/Fonts.hpp>
 
+#include <CLI/CLI.hpp>
 #include <ImGuiPianoKeyboard.hpp>
 #include <SDL3/SDL.h>
 #include <imgui-knobs.h>
@@ -22,7 +24,6 @@
 
 constexpr uint16_t BUFFER_SIZE = 64;
 constexpr uint32_t SAMPLE_RATE = 48000;
-constexpr auto PLAYER_ID = "org.yoursoftware.sound.hexwave";
 
 constexpr SDL_AudioSpec AUDIO_SPEC = {SDL_AUDIO_F32, 2, SAMPLE_RATE};
 
@@ -32,6 +33,7 @@ auto output_buffer = new float[BUFFER_SIZE * 2 /* x2 for stereo */];
 float param_value = 0.f;
 float pitch_wheel = 0.5f;
 float mod_wheel = 0.f;
+float expression_wheel = 0.f;
 
 auto keys_pressed = new bool[128]{};
 bool run_main_loop = true;
@@ -129,7 +131,7 @@ void yoursound_error_callback(const char *message) {
 	show_error(final_message);
 }
 
-void save_state(const bool store_reference, const YourSound::Player *player) {
+void save_state(const bool store_reference, YourSound::Player *player) {
 	const char *player_id = player->get_id();
 
 	const uint64_t buffer_size = player->store_calc_size(store_reference);
@@ -164,8 +166,22 @@ void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, int additio
 	}
 }
 
-int main(int argv, char *argc[]) {
+int main(const int argc, char *argv[]) {
 	YourSound::BinPlayer::set_error_func(yoursound_error_callback);
+
+	std::string PLAYER_ID;
+	std::filesystem::path SHARED_LIB;
+	bool INTEGRATED = false;
+
+	{
+		CLI::App app;
+
+		app.add_option("-p", PLAYER_ID, "Player ID")->required();
+		app.add_option("-s", SHARED_LIB, "Shared Library")->required();
+		app.add_flag("-i", INTEGRATED, "Integrated Flag");
+
+		CLI11_PARSE(app, argc, argv);
+	}
 
 	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) return 1;
 
@@ -198,7 +214,6 @@ int main(int argv, char *argc[]) {
 	ImGui_ImplSDLRenderer3_Init(renderer);
 
 	style.FontSizeBase = 20.0f;
-	io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf");
 	YourSound::UI::imgui_load_fonts(io);
 	io.Fonts->Build();
 
@@ -206,12 +221,11 @@ int main(int argv, char *argc[]) {
 	style.Colors[ImGuiCol_WindowBg].w = 1.f;
 
 	YourSound::BinPlayer::Integrated::register_basic_osc_player();
+	YourSound::BinPlayer::Integrated::register_lua_players();
 	YourSound::BinPlayer::Integrated::register_mod_lfo();
-	if (!ask_yesno_question("Is the binary player integrated?"))
-		YourSound::BinPlayer::register_player(PLAYER_ID, [] {
-			return YourSound::load_binary_player(
-				R"(D:\dev\YourSoftware\Sound\build-debug\factory\binary\Debug\binplayers-x86-64.dll)", PLAYER_ID);
-		});
+	if (!INTEGRATED)
+		YourSound::BinPlayer::register_player(
+			PLAYER_ID, [SHARED_LIB, PLAYER_ID] { return YourSound::load_binary_player(SHARED_LIB, PLAYER_ID); });
 
 	try {
 		YourSound::Player *bin_player_internal = YourSound::load_player_by_id(PLAYER_ID);
@@ -268,7 +282,8 @@ int main(int argv, char *argc[]) {
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("Binary Player", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar);
+		ImGui::Begin("Binary Player", nullptr,
+					 ImGuiWindowFlags_NoResize | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_AlwaysAutoResize);
 		ImGui::BeginMenuBar();
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("Save State")) save_state(true, bin_player);
@@ -294,19 +309,10 @@ int main(int argv, char *argc[]) {
 			ImGui::Separator();
 			ImGui::Spacing();
 
-			if (ImGui::VSliderFloat("##mod_wheel", ImVec2(16, 100), &mod_wheel, 0.f, 1.f, "")) {
-				bin_player->set_parameter("_midi_cc_1", mod_wheel);
-			}
-
-			if (ImGui::IsItemHovered()) {
-				ImGui::BeginTooltip();
-				ImGui::Text("Modulation Wheel (CC1)");
-				ImGui::EndTooltip();
-			}
-
-			ImGui::SameLine();
-
-			if (ImGui::VSliderFloat("##pitch_wheel", ImVec2(16, 100), &pitch_wheel, 0.f, 1.f, "")) {
+			if (ImGui::VSliderFloat("##pitch_wheel", ImVec2(16, 100), &pitch_wheel, 0.f, 1.f, ""))
+				bin_player->set_parameter("_pitch_wheel", pitch_wheel);
+			else {
+				pitch_wheel = 0.5f;
 				bin_player->set_parameter("_pitch_wheel", pitch_wheel);
 			}
 
@@ -318,12 +324,35 @@ int main(int argv, char *argc[]) {
 
 			ImGui::SameLine();
 
+			if (ImGui::VSliderFloat("##mod_wheel", ImVec2(16, 100), &mod_wheel, 0.f, 1.f, ""))
+				bin_player->set_parameter("_midi_cc_1", mod_wheel);
+
+			if (ImGui::IsItemHovered()) {
+				ImGui::BeginTooltip();
+				ImGui::Text("Mod Wheel (CC1)");
+				ImGui::EndTooltip();
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::VSliderFloat("##expression_wheel", ImVec2(16, 100), &expression_wheel, 0.f, 1.f, ""))
+				bin_player->set_parameter("_midi_cc_11", expression_wheel);
+
+			if (ImGui::IsItemHovered()) {
+				ImGui::BeginTooltip();
+				ImGui::Text("Expression (CC11)");
+				ImGui::EndTooltip();
+			}
+
+			ImGui::SameLine();
+
 			ImGui_PianoKeyboard("Piano", ImVec2(1024, 100), &prev_note_active, 21, 108, piano_callback, bin_player);
 		}
 		ImGui::End();
 
 		ImGui::Begin("Audio Wave", nullptr, ImGuiWindowFlags_NoResize);
-		ImGui::PlotLines("", output_buffer, 128, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50));
+		ImGui::PlotLines("", output_buffer, BUFFER_SIZE / 2, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50), sizeof(float) * 2);
+		ImGui::PlotLines("", output_buffer + 1, BUFFER_SIZE / 2, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50), sizeof(float) * 2);
 		ImGui::End();
 
 		if (show_param_edit) {

@@ -7,14 +7,21 @@
 namespace YourSound::UI {
 	inline ImFont *g_imgui_icon_font;
 	inline ImFont *g_imgui_icon_font_large;
+	inline ImFont *g_imgui_mono_font;
+	inline ImFont *g_imgui_mono_font_bold;
 
-	static constexpr ImWchar ICONS_RANGES[] = { 0xe000, 0xf8ff, 0 };
+	static constexpr ImWchar ICONS_RANGES[] = {0xe000, 0xf8ff, 0};
 
-	inline void imgui_load_fonts(const ImGuiIO &io) {
+	inline YS_CORE_EXPORT_NO_EXTERN void imgui_load_fonts(const ImGuiIO &io) {
+		io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf");
+
 		ImFontConfig config;
 		config.MergeMode = true;
 		config.GlyphMinAdvanceX = 13.0f;
 		g_imgui_icon_font = io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FAS, 16.f, &config, ICONS_RANGES);
 		g_imgui_icon_font_large = io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FAS, 64.f, &config, ICONS_RANGES);
+
+		g_imgui_mono_font = io.Fonts->AddFontFromFileTTF("font/FiraCode-Regular.ttf");
+		g_imgui_mono_font_bold = io.Fonts->AddFontFromFileTTF("font/FiraCode-SemiBold.ttf");
 	}
-}
+} // namespace YourSound::UI

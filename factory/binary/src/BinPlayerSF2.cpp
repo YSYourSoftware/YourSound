@@ -2,7 +2,6 @@
 
 #define TSF_IMPLEMENTATION
 #include <YourSound/BinPlayerInterface.hpp>
-#include <YourSound/Config.hpp>
 #include <YourSound/Serialisation.hpp>
 #include <YourSound/UI/Controls.hpp>
 #include <tsf.h>
@@ -13,13 +12,14 @@
 void action_import_sf2(const char *filepath) {
 	try {
 		const std::filesystem::path soundfont = filepath;
-		const std::filesystem::path library_location =
-			YourSound::get_library_location() / "Imported SoundFonts" / soundfont.stem();
+		const std::filesystem::path library_location = std::filesystem::path(ysbp_get_library_location()) /
+													   "org.yoursoftware.sound.sf2.imported" / soundfont.stem();
+		const std::filesystem::path internal_soundfont = library_location / "source.sf2";
 
 		std::filesystem::create_directory(library_location);
-		std::filesystem::copy_file(soundfont, library_location / "source.sf2");
+		std::filesystem::copy_file(soundfont, internal_soundfont);
 
-		tsf *sf2 = tsf_load_filename(filepath);
+		tsf *sf2 = tsf_load_filename(reinterpret_cast<const char *>(internal_soundfont.u8string().c_str()));
 
 		for (int i = 0; i < tsf_get_presetcount(sf2); i++) {
 			std::ofstream file{library_location / (std::string(tsf_get_presetname(sf2, i)) + ".yspp")};
@@ -61,12 +61,12 @@ void BinPlayerSF2::render(float *output_buffer, const uint16_t number_samples) {
 	tsf_render_float(m_soundfont, output_buffer, number_samples, false);
 }
 
-uint64_t BinPlayerSF2::store_calc_size(const bool store_reference) const {
+uint64_t BinPlayerSF2::store_calc_size(const bool store_reference) {
 	// preset_id[2] + soundfont_resource[?]
 	return 2 + m_soundfont_resource.store_calc_size(store_reference);
 }
 
-void BinPlayerSF2::store(uint8_t *output_buffer, const bool store_reference) const {
+void BinPlayerSF2::store(uint8_t *output_buffer, bool store_reference) {
 	YourSound::write_integral_be<uint16_t>(output_buffer, m_preset_id);
 	m_soundfont_resource.store(output_buffer + 2, store_reference);
 }

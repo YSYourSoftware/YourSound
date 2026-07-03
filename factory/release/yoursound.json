@@ -43,6 +43,10 @@
 			"sharedLibraryKey": "all",
 			"name": "HexWave Player",
 			"frontFacing": true
+		}, {
+			"id": "org.yoursoftware.sound.2a03",
+			"sharedLibraryKey": "all",
+			"name": "2A03 Emulator"
 		}
 	], "binPlayerCompat": [
 		"windows",

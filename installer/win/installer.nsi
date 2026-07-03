@@ -18,6 +18,7 @@ BrandingText " "
 !include LogicLib.nsh
 
 !include "AssociateFileType.nsh"
+!include "CreateURIScheme.nsh"
 
 !include "Welcome.nsdinc"
 !include "Conflicting.nsdinc"
@@ -61,6 +62,8 @@ Section "Core Components" SecCore
 	WriteRegDWORD HKLM "${REG_UNINS}" "Language" $Language
 	WriteRegDWORD HKLM "${REG_UNINS}" "NoModify" 1
 	WriteRegDWORD HKLM "${REG_UNINS}" "NoRepair" 1
+
+	!insertmacro RegisterURIScheme "ysft-ysnd-install" "YourSound Web Library Installer" "$INSTDIR\YSLibMgr.exe,0" "$INSTDIR\ysqinst.bat"
 SectionEnd
 
 Section "un.Core Components" UnCore
@@ -68,6 +71,7 @@ Section "un.Core Components" UnCore
 	DeleteRegKey HKLM "${REG_UNINS}"
 	DeleteRegKey HKLM "${REG_DATA}"
 	RMDir /r /REBOOTOK "$INSTDIR"
+	!insertmacro UnregisterURIScheme "ysft-ysnd-install"
 SectionEnd
 
 Section "Start Menu Shortcut" SecStartMenu

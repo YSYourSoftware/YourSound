@@ -15,6 +15,7 @@ target_include_directories(YSLibTest PRIVATE
 target_link_libraries(YSLibTest PRIVATE
 	ImGui_SDL3
 	YourSound
+	CLI11
 )
 
 add_dependencies(YSLibTest YourSound)

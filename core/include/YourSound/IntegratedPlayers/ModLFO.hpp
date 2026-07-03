@@ -27,22 +27,22 @@ namespace YourSound::BinPlayer::Integrated {
 
 			void render(float *output_buffer, uint16_t number_samples) override;
 
-			uint64_t store_calc_size(bool store_reference) const override;
-			void store(uint8_t *output_buffer, bool store_reference) const override;
+			uint64_t store_calc_size(const bool store_reference) override;
+			void store(uint8_t *output_buffer, bool store_reference) override;
 			void load(const uint8_t *input_buffer) override;
 
 			void set_bpm(const uint16_t value) override {m_bpm = value; m_player->set_bpm(value);}
 			void set_sample_rate(const uint32_t value) override {m_sample_rate = value; m_player->set_sample_rate(value);}
 
 			void set_parameter(const char *param_id, const float value) override {m_player->set_parameter(param_id, value);}
-			void get_parameters(const char **buffer) const override {return m_player->get_parameters(buffer);}
-			uint8_t get_parameter_count() const override {return m_player->get_parameter_count();}
+			void get_parameters(const char **buffer) override {return m_player->get_parameters(buffer);}
+			uint8_t get_parameter_count() override {return m_player->get_parameter_count();}
 
 			void render_graphics() override;
 
 			void reset() override;
 
-			const char *get_id() const override {return "org.yoursoftware.sound.mod.lfo";}
+			const char *get_id() override {return "org.yoursoftware.sound.mod.lfo";}
 
 			void set_wrapped_player(YS_PlayerHandle player) override {m_player = static_cast<Player*>(player);}
 		private:

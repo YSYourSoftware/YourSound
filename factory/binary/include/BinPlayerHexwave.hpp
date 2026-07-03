@@ -1,6 +1,6 @@
 #pragma once
 
-#include <YourSound/Rack.hpp>
+#include <YourSound/Player.hpp>
 
 struct HexWave;
 
@@ -14,22 +14,22 @@ class BinPlayerHexwave : public YourSound::Player {
 
 		void render(float *output_buffer, uint16_t number_samples) override;
 
-		uint64_t store_calc_size(bool store_reference) const override;
-		void store(uint8_t *output_buffer, bool store_reference) const override;
+		uint64_t store_calc_size(bool store_reference) override;
+		void store(uint8_t *output_buffer, bool store_reference) override;
 		void load(const uint8_t *input_buffer) override;
 
 		void set_bpm(uint16_t value) override {};
 		void set_sample_rate(uint32_t value) override;
 
 		void set_parameter(const char *param_id, float value) override;
-		void get_parameters(const char **buffer) const override;
-		uint8_t get_parameter_count() const override {return 4;}
+		void get_parameters(const char **buffer) override;
+		uint8_t get_parameter_count() override {return 4;}
 
 		void reset() override;
 
 		void render_graphics() override;
 
-		const char *get_id() const override {return "org.yoursoftware.sound.hexwave";}
+		const char *get_id() override {return "org.yoursoftware.sound.hexwave";}
 	private:
 		uint8_t m_note_on = 0;
 		float m_note_velocity = 0.f;

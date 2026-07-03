@@ -4,14 +4,28 @@
 #include "YourSound/Version.hpp"
 
 #include <cstdint>
+#include <format>
 #include <iostream>
 #include <numbers>
 #include <source_location>
 
 #ifdef _WIN32
 #define YS_EXTERN_EXPORT extern "C" __declspec(dllexport)
+#elifdef __GNUC__
+#define YS_EXTERN_EXPORT extern "C" __attribute__((visibility("default")))
 #else
 #define YS_EXTERN_EXPORT extern "C"
+#endif
+
+#ifdef _MSC_VER
+#define YS_BP_REG_BUILD_INFO                                                                                           \
+	YS_EXTERN_EXPORT const char *get_build_info() {                                                                    \
+		return std::format("MSVC {}.{:02}", _MSC_VER / 100, _MSC_VER % 100).c_str();                                   \
+	}
+#else
+#define YS_BP_REG_BUILD_INFO                                                                                           \
+	YS_EXTERN_EXPORT                                                                                                   \
+	const char *get_build_info() { return "Unknown"; }
 #endif
 
 #define YS_START_BP_REGISTRY                                                                                           \
@@ -67,6 +81,8 @@
 		delete static_cast<YourSound::Player *>(player);                                                               \
 	}                                                                                                                  \
 	YS_EXTERN_EXPORT uint32_t get_api_version() { return YS_API_VERSION; }                                             \
+	YS_BP_REG_BUILD_INFO                                                                                               \
+	YS_EXTERN_EXPORT inline const char *get_yoursound_version() { return YS_VERSION_STRING; }                          \
 	YS_EXTERN_EXPORT YS_PlayerHandle create_bin_player(const char *id) {                                               \
 		if (!id) return nullptr;
 #define YS_REGISTER_BP(bp_id, bp_class)                                                                                \
@@ -113,7 +129,7 @@ namespace YourSound::BinPlayer {
 		switch (osc) {
 		case SQUARE: return (time < 0.5f) ? 1.0f : 0.0f;
 		case TRIANGLE: return (time < 0.5f) ? (time * 2.0f) : (2.0f - 2.0f * time);
-		case SINE: return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi) + 1.0f);
+		case SINE: return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi_v<float>) + 1.0f);
 		case SAWTOOTH: return time;
 		case NOISE: return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
 		}
