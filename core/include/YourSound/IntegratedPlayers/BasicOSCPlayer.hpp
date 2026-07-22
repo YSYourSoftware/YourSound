@@ -20,6 +20,7 @@ namespace YourSound::BinPlayer::Integrated {
 			void set_sample_rate(const uint32_t value) override {m_sample_rate = value;}
 
 			void set_parameter(const char *param_id, float value) override;
+			float get_parameter(const char *param_id) override;
 			void get_parameters(const char **buffer) override {buffer[0] = "osc";}
 			uint8_t get_parameter_count() override {return 1;}
 

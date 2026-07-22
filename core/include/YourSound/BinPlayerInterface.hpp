@@ -11,6 +11,7 @@ YS_CORE_EXPORT void ysbp_rack_wrap_player(YS_RackHandle rack, YS_PlayerHandle pl
 YS_CORE_EXPORT inline void ysbp_player_note_on(YS_PlayerHandle player, const uint8_t midi_note_number, float velocity) {
 	static_cast<YourSound::Player *>(player)->note_on(midi_note_number, velocity);
 }
+
 YS_CORE_EXPORT inline void ysbp_player_note_off(YS_PlayerHandle player, const uint8_t midi_note_number) {
 	static_cast<YourSound::Player *>(player)->note_off(midi_note_number);
 }
@@ -23,10 +24,12 @@ YS_CORE_EXPORT inline void ysbp_player_render(YS_PlayerHandle player, float *out
 YS_CORE_EXPORT inline uint64_t ysbp_player_store_calc_size(YS_PlayerHandle player, const bool store_reference) {
 	return static_cast<YourSound::Player *>(player)->store_calc_size(store_reference);
 }
+
 YS_CORE_EXPORT inline void ysbp_player_store(YS_PlayerHandle player, uint8_t *output_buffer,
 											 const bool store_reference) {
 	static_cast<YourSound::Player *>(player)->store(output_buffer, store_reference);
 }
+
 YS_CORE_EXPORT inline void ysbp_player_load(YS_PlayerHandle player, const uint8_t *input_buffer) {
 	static_cast<YourSound::Player *>(player)->load(input_buffer);
 }
@@ -34,16 +37,23 @@ YS_CORE_EXPORT inline void ysbp_player_load(YS_PlayerHandle player, const uint8_
 YS_CORE_EXPORT inline void ysbp_player_set_bpm(YS_PlayerHandle player, const uint16_t value) {
 	static_cast<YourSound::Player *>(player)->set_bpm(value);
 }
+
 YS_CORE_EXPORT inline void ysbp_player_set_sample_rate(YS_PlayerHandle player, const uint32_t value) {
 	static_cast<YourSound::Player *>(player)->set_sample_rate(value);
 }
 
-YS_CORE_EXPORT inline void ysbp_player_set_parameter(YS_PlayerHandle player, const char *param_id, float value) {
+YS_CORE_EXPORT inline void ysbp_player_set_parameter(YS_PlayerHandle player, const char *param_id, const float value) {
 	static_cast<YourSound::Player *>(player)->set_parameter(param_id, value);
 }
+
+YS_CORE_EXPORT inline float ysbp_player_get_parameter(YS_PlayerHandle player, const char *param_id) {
+	return static_cast<YourSound::Player *>(player)->get_parameter(param_id);
+}
+
 YS_CORE_EXPORT inline void ysbp_player_get_parameters(YS_PlayerHandle player, const char **buffer) {
 	static_cast<YourSound::Player *>(player)->get_parameters(buffer);
 }
+
 YS_CORE_EXPORT inline uint8_t ysbp_player_get_parameter_count(YS_PlayerHandle player) {
 	return static_cast<YourSound::Player *>(player)->get_parameter_count();
 }

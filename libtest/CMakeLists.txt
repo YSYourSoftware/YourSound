@@ -3,6 +3,7 @@ add_executable(YSLibTest)
 target_compile_features(YSLibTest PRIVATE cxx_std_23)
 
 target_sources(YSLibTest PRIVATE
+	src/BinPlayerDebug.cpp
 	src/main.cpp
 	src/MessageBox.cpp
 )
@@ -15,10 +16,15 @@ target_include_directories(YSLibTest PRIVATE
 target_link_libraries(YSLibTest PRIVATE
 	ImGui_SDL3
 	YourSound
+	YSKeyboardMappingHandler
 	CLI11
 )
 
-add_dependencies(YSLibTest YourSound)
+if(WIN32)
+	target_sources(YSLibTest PRIVATE ../shared.rc app.rc)
+endif()
+
+add_dependencies(YSLibTest YourSound YSKeyboardMappingHandler)
 add_custom_command(TARGET YSLibTest POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 	$<TARGET_RUNTIME_DLLS:YSLibTest>

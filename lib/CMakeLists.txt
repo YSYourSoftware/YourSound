@@ -3,9 +3,12 @@ if(YS_BUILD_PLUGIN)
 	add_subdirectory(imgui_juce)
 endif()
 
-add_subdirectory(dr_libs)
+set(RTMIDI_BUILD_STATIC_LIBS ON)
+set(RTMIDI_BUILD_TESTING OFF)
+
 add_subdirectory(freetype)
 add_subdirectory(json)
+add_subdirectory(rtmidi)
 add_subdirectory(SArc)
 add_subdirectory(SDL EXCLUDE_FROM_ALL)
 add_subdirectory(sol2)

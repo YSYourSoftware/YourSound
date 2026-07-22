@@ -27,6 +27,8 @@ public:
 	void set_sample_rate(const uint32_t value) override { m_sample_rate = value; }
 
 	void set_parameter(const char *param_id, float value) override;
+
+	float get_parameter(const char *param_id) override;
 	void get_parameters(const char **buffer) override;
 	uint8_t get_parameter_count() override { return 1; }
 
@@ -43,7 +45,6 @@ public:
 	const char *get_id() override { return "org.yoursoftware.sound.2a03"; }
 private:
 	enum Waveform : uint8_t { PULSE = 0, TRIANGLE = 1, NOISE = 2 };
-
 	enum DutyCycle : uint8_t { D12_5 = 0, D25 = 1, D50 = 2, D75 = 3 };
 
 	uint32_t m_sample_rate = 0;
@@ -51,6 +52,7 @@ private:
 	float m_phase = 0.f;
 	float m_noise_timer = 0.f;
 	float m_frequency = NAN;
+	float m_volume = 0.f;
 
 	uint16_t m_lfsr = 1;
 	uint8_t m_noise_period = 0;

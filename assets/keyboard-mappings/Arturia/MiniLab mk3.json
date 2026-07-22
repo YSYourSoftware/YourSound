@@ -1,0 +1,108 @@
+{
+	"script": "miniLabMK3.lua",
+	"controls": {
+		"modwheel": {
+			"bind": "cc:1",
+			"onInput": "scriptEvent"
+		}, "shift":  {
+			"bind": "cc:9",
+			"onInput": "scriptEvent"
+		}, "pad1": {
+			"bind": "note:36",
+			"onInput": "forward:_qparam_buttonlike_hold_1"
+		}, "pad2": {
+			"bind": "note:37",
+			"onInput": "forward:_qparam_buttonlike_hold_2"
+		}, "pad3": {
+			"bind": "note:38",
+			"onInput": "forward:_qparam_buttonlike_hold_3"
+		}, "pad4": {
+			"bind": "note:39",
+			"onInput": "forward:_qparam_buttonlike_hold_4"
+		}, "pad5": {
+			"bind": "note:40",
+			"onInput": "forward:_qparam_buttonlike_hold_5"
+		}, "pad6": {
+			"bind": "note:41",
+			"onInput": "forward:_qparam_buttonlike_hold_6"
+		}, "pad7": {
+			"bind": "note:42",
+			"onInput": "forward:_qparam_buttonlike_hold_7"
+		}, "pad8": {
+			"bind": "note:43",
+			"onInput": "forward:_qparam_buttonlike_hold_8"
+		}, "pad1_toggle": {
+			"bind": "note:44",
+			"onInput": "forward:_qparam_buttonlike_toggle_1"
+		}, "pad2_toggle": {
+			"bind": "note:45",
+			"onInput": "forward:_qparam_buttonlike_toggle_2"
+		}, "pad3_toggle": {
+			"bind": "note:46",
+			"onInput": "forward:_qparam_buttonlike_toggle_3"
+		}, "pad4_toggle": {
+			"bind": "note:47",
+			"onInput": "forward:_qparam_buttonlike_toggle_4"
+		}, "pad5_toggle": {
+			"bind": "note:48",
+			"onInput": "forward:_qparam_buttonlike_toggle_5"
+		}, "pad6_toggle": {
+			"bind": "note:49",
+			"onInput": "forward:_qparam_buttonlike_toggle_6"
+		}, "pad7_toggle": {
+			"bind": "note:50",
+			"onInput": "forward:_qparam_buttonlike_toggle_7"
+		}, "pad8_toggle": {
+			"bind": "note:51",
+			"onInput": "forward:_qparam_buttonlike_toggle_8"
+		}, "centralWheel": {
+			"bind": "cc:114",
+			"onInput": "scriptEvent"
+		}, "centralWheel_shift": {
+			"bind": "cc:112",
+			"onInput": "scriptEvent"
+		}, "centralWheel_click": {
+			"bind": "cc:115",
+			"onInput": "scriptEvent"
+		}, "centralWheel_click_shift": {
+			"bind": "cc:113",
+			"onInput": "scriptEvent"
+		}, "knob1": {
+			"bind": "cc:74",
+			"onInput": "scriptEvent"
+		}, "knob2": {
+			"bind": "cc:71",
+			"onInput": "scriptEvent"
+		}, "knob3": {
+			"bind": "cc:76",
+			"onInput": "scriptEvent"
+		}, "knob4": {
+			"bind": "cc:77",
+			"onInput": "scriptEvent"
+		}, "knob5": {
+			"bind": "cc:93",
+			"onInput": "scriptEvent"
+		}, "knob6": {
+			"bind": "cc:18",
+			"onInput": "scriptEvent"
+		}, "knob7": {
+			"bind": "cc:19",
+			"onInput": "scriptEvent"
+		}, "knob8": {
+			"bind": "cc:16",
+			"onInput": "scriptEvent"
+		}, "fader1": {
+			"bind": "cc:82",
+			"onInput": "forward:_qparam_faderlike_1"
+		}, "fader2": {
+			"bind": "cc:83",
+			"onInput": "forward:_qparam_faderlike_2"
+		}, "fader3": {
+			"bind": "cc:85",
+			"onInput": "forward:_qparam_faderlike_3"
+		}, "fader4": {
+			"bind": "cc:17",
+			"onInput": "forward:_qparam_faderlike_4"
+		}
+	}
+}

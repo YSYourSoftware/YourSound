@@ -1,3 +1,4 @@
+#include "BinPlayerDebug.hpp"
 #include "MessageBox.hpp"
 
 #include <YourSound/BinPlayerRegistry.hpp>
@@ -11,6 +12,7 @@
 #include <CLI/CLI.hpp>
 #include <ImGuiPianoKeyboard.hpp>
 #include <SDL3/SDL.h>
+#include <YSKMH/MIDIMapping.hpp>
 #include <imgui-knobs.h>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
@@ -21,6 +23,7 @@
 #include <iostream>
 #include <mutex>
 #include <stacktrace>
+#include <valarray>
 
 constexpr uint16_t BUFFER_SIZE = 64;
 constexpr uint32_t SAMPLE_RATE = 48000;
@@ -149,7 +152,7 @@ void save_state(const bool store_reference, YourSound::Player *player) {
 	delete[] buffer;
 }
 
-void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, int additional_amount, int total_amount) {
+void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, const int additional_amount, int total_amount) {
 	if (bin_player_loading) return;
 	if (additional_amount < 1) return;
 
@@ -173,12 +176,20 @@ int main(const int argc, char *argv[]) {
 	std::filesystem::path SHARED_LIB;
 	bool INTEGRATED = false;
 
+	std::string WRAPPER_ID;
+	std::filesystem::path WRAPPER_SHARED_LIB;
+	bool WRAPPER_INTEGRATED = false;
+
 	{
 		CLI::App app;
 
 		app.add_option("-p", PLAYER_ID, "Player ID")->required();
-		app.add_option("-s", SHARED_LIB, "Shared Library")->required();
+		app.add_option("-s", SHARED_LIB, "Shared Library");
 		app.add_flag("-i", INTEGRATED, "Integrated Flag");
+
+		app.add_option("-w", WRAPPER_ID, "Player Wrapper ID");
+		app.add_option("--ws", WRAPPER_SHARED_LIB, "Player Wrapper Shared Library");
+		app.add_flag("--wi", WRAPPER_INTEGRATED, "Player Wrapper Integrated Flag");
 
 		CLI11_PARSE(app, argc, argv);
 	}
@@ -226,13 +237,19 @@ int main(const int argc, char *argv[]) {
 	if (!INTEGRATED)
 		YourSound::BinPlayer::register_player(
 			PLAYER_ID, [SHARED_LIB, PLAYER_ID] { return YourSound::load_binary_player(SHARED_LIB, PLAYER_ID); });
+	if (WRAPPER_ID.length() > 0 && !WRAPPER_INTEGRATED)
+		YourSound::BinPlayer::register_player(WRAPPER_ID, [WRAPPER_SHARED_LIB, WRAPPER_ID] {
+			return YourSound::load_binary_player(WRAPPER_SHARED_LIB, WRAPPER_ID);
+		});
 
 	try {
 		YourSound::Player *bin_player_internal = YourSound::load_player_by_id(PLAYER_ID);
 		bin_player = bin_player_internal;
 
-		//bin_player = YourSound::load_player_wrapper_by_id("org.yoursoftware.sound.mod.lfo");
-		//dynamic_cast<YourSound::PlayerWrapper *>(bin_player)->set_wrapped_player(bin_player_internal);
+		if (WRAPPER_ID.length() > 0) {
+			bin_player = YourSound::load_player_wrapper_by_id(WRAPPER_ID);
+			dynamic_cast<YourSound::PlayerWrapper *>(bin_player)->set_wrapped_player(bin_player_internal);
+		}
 	} catch (const std::exception &e) {
 		show_error(e.what());
 		return 1;
@@ -241,6 +258,12 @@ int main(const int argc, char *argv[]) {
 	if (!bin_player) {
 		std::cerr << "Player pointer null" << std::endl;
 		return 1;
+	}
+
+	{
+		YourSound::Player *bin_player_internal = bin_player;
+		bin_player = new BinPlayerDebug();
+		dynamic_cast<YourSound::PlayerWrapper *>(bin_player)->set_wrapped_player(bin_player_internal);
 	}
 
 	bin_player->set_bpm(120);
@@ -263,6 +286,56 @@ int main(const int argc, char *argv[]) {
 																				 {"All Files", "*"}};
 
 	YourSound::UI::set_imgui_context(ImGui::GetCurrentContext());
+
+	std::string midi_map_json;
+
+	{
+		if (!std::filesystem::is_regular_file("keyboard-mappings/Arturia/MiniLab mk3.json")) {
+			show_error(std::format("missing config\n cwd: {}", std::filesystem::current_path().generic_string()));
+			return 1;
+		}
+
+		std::ifstream midi_map_json_file{"keyboard-mappings/Arturia/MiniLab mk3.json", std::ios::ate};
+		midi_map_json.resize(midi_map_json_file.tellg());
+		midi_map_json_file.seekg(0, std::ios::beg);
+		midi_map_json_file.read(midi_map_json.data(), midi_map_json.size());
+	}
+
+	YSMKH::MIDIMapping::param_set_callback_t mm_param_set_cb = [](const std::string &id, const float value) {
+		bin_player->set_parameter(id.c_str(), value);
+		if (id == "_midi_cc_1") mod_wheel = value;
+		else if (id == "_midi_cc_11") expression_wheel = value;
+	};
+
+	YSMKH::MIDIMapping::param_get_callback_t mm_param_get_cb = [](const std::string &id) -> float {
+		return bin_player->get_parameter(id.c_str());
+	};
+
+	YSMKH::MIDIMapping::note_on_callback_t mm_note_on_cb = [](const uint8_t channel, const uint8_t note,
+															  const float velocity) {
+		if (channel != 0) return;
+		keys_pressed[note] = true;
+		bin_player->note_on(note, velocity);
+	};
+
+	YSMKH::MIDIMapping::note_off_callback_t mm_note_off_cb = [](const uint8_t channel, const uint8_t note) {
+		if (channel != 0) return;
+		keys_pressed[note] = false;
+		bin_player->note_off(note);
+	};
+
+	YSMKH::MIDIMapping midi_mapping{midi_map_json,
+									"keyboard-mappings/Arturia",
+									mm_param_set_cb,
+									mm_param_get_cb,
+									[](int8_t amount) {},
+									[](int8_t amount) {},
+									[] {},
+									[] {},
+									mm_note_on_cb,
+									mm_note_off_cb};
+
+	midi_mapping.set_midi_input(0);
 
 	while (run_main_loop) {
 		SDL_Event event;
@@ -309,6 +382,13 @@ int main(const int argc, char *argv[]) {
 			ImGui::Separator();
 			ImGui::Spacing();
 
+			try {
+				midi_mapping.poll();
+			} catch (std::exception &e) {
+				show_error(std::format("An error occurred whilst polling MIDI events:\n{}", e.what()));
+				return 1;
+			}
+
 			if (ImGui::VSliderFloat("##pitch_wheel", ImVec2(16, 100), &pitch_wheel, 0.f, 1.f, ""))
 				bin_player->set_parameter("_pitch_wheel", pitch_wheel);
 			else {
@@ -351,8 +431,10 @@ int main(const int argc, char *argv[]) {
 		ImGui::End();
 
 		ImGui::Begin("Audio Wave", nullptr, ImGuiWindowFlags_NoResize);
-		ImGui::PlotLines("", output_buffer, BUFFER_SIZE / 2, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50), sizeof(float) * 2);
-		ImGui::PlotLines("", output_buffer + 1, BUFFER_SIZE / 2, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50), sizeof(float) * 2);
+		ImGui::PlotLines("", output_buffer, BUFFER_SIZE / 2, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50),
+						 sizeof(float) * 2);
+		ImGui::PlotLines("", output_buffer + 1, BUFFER_SIZE / 2, 0, nullptr, -1.0f, 1.0f, ImVec2(150, 50),
+						 sizeof(float) * 2);
 		ImGui::End();
 
 		if (show_param_edit) {

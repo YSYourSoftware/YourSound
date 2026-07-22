@@ -32,6 +32,7 @@
 	YS_EXTERN_EXPORT void player_note_on(YS_PlayerHandle player, const uint8_t midi_note_number, float velocity) {     \
 		static_cast<YourSound::Player *>(player)->note_on(midi_note_number, velocity);                                 \
 	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT void player_note_off(YS_PlayerHandle player, const uint8_t midi_note_number) {                    \
 		static_cast<YourSound::Player *>(player)->note_off(midi_note_number);                                          \
 	}                                                                                                                  \
@@ -43,9 +44,11 @@
 	YS_EXTERN_EXPORT uint64_t player_store_calc_size(YS_PlayerHandle player, const bool store_reference) {             \
 		return static_cast<YourSound::Player *>(player)->store_calc_size(store_reference);                             \
 	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT void player_store(YS_PlayerHandle player, uint8_t *output_buffer, const bool store_reference) {   \
 		static_cast<YourSound::Player *>(player)->store(output_buffer, store_reference);                               \
 	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT void player_load(YS_PlayerHandle player, const uint8_t *input_buffer) {                           \
 		static_cast<YourSound::Player *>(player)->load(input_buffer);                                                  \
 	}                                                                                                                  \
@@ -53,6 +56,7 @@
 	YS_EXTERN_EXPORT void player_set_bpm(YS_PlayerHandle player, const uint16_t value) {                               \
 		static_cast<YourSound::Player *>(player)->set_bpm(value);                                                      \
 	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT void player_set_sample_rate(YS_PlayerHandle player, const uint32_t value) {                       \
 		static_cast<YourSound::Player *>(player)->set_sample_rate(value);                                              \
 	}                                                                                                                  \
@@ -60,9 +64,15 @@
 	YS_EXTERN_EXPORT void player_set_parameter(YS_PlayerHandle player, const char *param_id, float value) {            \
 		static_cast<YourSound::Player *>(player)->set_parameter(param_id, value);                                      \
 	}                                                                                                                  \
+                                                                                                                       \
+	YS_EXTERN_EXPORT float player_get_parameter(YS_PlayerHandle player, const char *param_id) {                        \
+		return static_cast<YourSound::Player *>(player)->get_parameter(param_id);                                             \
+	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT void player_get_parameters(YS_PlayerHandle player, const char **buffer) {                         \
 		static_cast<YourSound::Player *>(player)->get_parameters(buffer);                                              \
 	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT uint8_t player_get_parameter_count(YS_PlayerHandle player) {                                      \
 		return static_cast<YourSound::Player *>(player)->get_parameter_count();                                        \
 	}                                                                                                                  \
@@ -80,6 +90,7 @@
 	YS_EXTERN_EXPORT void destroy_bin_player(YS_PlayerHandle player) {                                                 \
 		delete static_cast<YourSound::Player *>(player);                                                               \
 	}                                                                                                                  \
+                                                                                                                       \
 	YS_EXTERN_EXPORT uint32_t get_api_version() { return YS_API_VERSION; }                                             \
 	YS_BP_REG_BUILD_INFO                                                                                               \
 	YS_EXTERN_EXPORT inline const char *get_yoursound_version() { return YS_VERSION_STRING; }                          \
@@ -112,40 +123,146 @@ namespace YourSound {
 
 		return result;
 	}
+
+	namespace BinPlayer {
+		enum BasicOscillator : uint8_t { SQUARE = 0, TRIANGLE = 1, SINE = 2, SAWTOOTH = 3, NOISE = 4 };
+
+		typedef struct AmpEnvelope {
+			float attack_time = 0.25f;
+			float decay_time = 0.25f;
+			float sustain_volume = 0.75f;
+			float release_time = 0.5f;
+		} amp_envelope_t;
+
+		[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f,
+												const float tuning = 440.f) {
+			const float semis = (static_cast<float>(midi_note) - 69.f) + pitch_bend * 2.f;
+			return tuning * std::exp2f(semis / 12.f);
+		}
+
+		[[nodiscard]] inline float calculate_amp_envelope(const amp_envelope_t &envelope, float time,
+														  const bool released) {
+			time = std::fmaxf(time, 0.f);
+
+			if (released) {
+				if (envelope.release_time == 0.f) return 0.f;
+
+				return std::lerp(envelope.sustain_volume, 0.0f,
+								 std::fminf(time, envelope.release_time) / envelope.release_time);
+			}
+
+			if (time <= envelope.attack_time && envelope.attack_time != 0.f)
+				return std::lerp(0.f, 1.f, time / envelope.attack_time);
+			if (time < envelope.attack_time + envelope.decay_time && envelope.decay_time != 0.f)
+				return std::lerp(1.f, envelope.sustain_volume, (time - envelope.attack_time) / envelope.decay_time);
+
+			return envelope.sustain_volume;
+		}
+
+		[[nodiscard]] inline float calculate_basic_osc(const BasicOscillator osc, float time) {
+			time = time - std::floorf(time);
+
+			switch (osc) {
+			case SQUARE: return (time < 0.5f) ? 1.0f : 0.0f;
+			case TRIANGLE: return (time < 0.5f) ? (time * 2.0f) : (2.0f - 2.0f * time);
+			case SINE: return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi_v<float>) + 1.0f);
+			case SAWTOOTH: return time;
+			case NOISE: return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
+			}
+
+			return 0.f;
+		}
+
+		inline void scale_float_array(float *arr, const uint32_t n, const float factor) {
+			if (factor == 1.f) return;
+			for (uint32_t i = 0; i < n; ++i) arr[i] *= factor;
+		}
+
+		inline void mono_to_stereo(const float *mono_array, float *stereo_array, const uint16_t samples) {
+			for (uint16_t i = 0; i < samples; ++i) {
+				stereo_array[i * 2] = mono_array[i];
+				stereo_array[(i * 2) + 1] = mono_array[i];
+			}
+		}
+
+		template <uint16_t Voices> class PolyphonyController {
+		public:
+			typedef struct _Voice {
+				float phase_advance = 0.f;
+				float phase = 0.f;
+				float velocity = 1.f;
+				float time = 0.f;
+
+				uint8_t midi_note_number = 0;
+
+				bool hanging_by_sustain = false;
+				bool decaying = false;
+			} voice_t;
+
+			typedef std::vector<voice_t>::iterator voice_iterator_t;
+			typedef std::vector<voice_t>::const_iterator voice_const_iterator_t;
+
+			PolyphonyController() { m_voices.reserve(Voices); }
+
+			void set_sample_rate(const uint32_t sample_rate) { m_sample_rate = sample_rate; }
+
+			void note_on(const uint8_t midi_note_number, const float velocity) {
+				if (m_voices.size() >= Voices) { m_voices.erase(m_voices.begin()); }
+
+				m_voices.emplace_back(midi_to_freq(midi_note_number, m_pitch_bend) / m_sample_rate, 0.f, velocity, 0.f,
+									  midi_note_number, false, false);
+			}
+
+			void note_off(const uint8_t midi_note_number) {
+				auto it = std::find_if(m_voices.begin(), m_voices.end(), [midi_note_number](const voice_t &v) {
+					return v.midi_note_number == midi_note_number && !v.decaying && !v.hanging_by_sustain;
+				});
+
+				if (it != m_voices.end()) {
+					if (m_sustaining) {
+						it->hanging_by_sustain = true;
+						return;
+					}
+
+					it->decaying = true;
+					it->time = 0.f;
+				}
+			}
+
+			void voice_delete(const voice_const_iterator_t &it) { m_voices.erase(it); }
+
+			void sustain_on() { m_sustaining = true; }
+			void sustain_off() {
+				m_sustaining = false;
+				for (auto &voice : m_voices) {
+					if (!voice.hanging_by_sustain) continue;
+					voice.decaying = true;
+					voice.time = 0.f;
+				}
+			}
+
+			void pitch_bend_update(const float pitch_bend) {
+				m_pitch_bend = pitch_bend;
+				for (auto &voice : m_voices)
+					voice.phase_advance = midi_to_freq(voice.midi_note_number, m_pitch_bend) / m_sample_rate;
+			}
+
+			void for_each_voice(std::function<void(const voice_iterator_t &)> function) {
+				for (voice_iterator_t it = m_voices.begin(); it <= m_voices.end(); ++it) function(it);
+			}
+
+			void reset() {
+				m_voices.clear();
+				m_pitch_bend = 0.f;
+				m_sustaining = false;
+			}
+		private:
+			std::vector<voice_t> m_voices;
+
+			float m_pitch_bend = 0.f;
+			uint32_t m_sample_rate = 0;
+
+			bool m_sustaining = false;
+		};
+	} // namespace BinPlayer
 } // namespace YourSound
-
-namespace YourSound::BinPlayer {
-	enum BasicOscillator : uint8_t { SQUARE = 0, TRIANGLE = 1, SINE = 2, SAWTOOTH = 3, NOISE = 4 };
-
-	[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f,
-											const float tuning = 440.f) {
-		const float semis = (static_cast<float>(midi_note) - 69.f) + pitch_bend * 2.f;
-		return tuning * std::exp2f(semis / 12.f);
-	}
-
-	[[nodiscard]] inline float calculate_basic_osc(const BasicOscillator osc, float time) {
-		time = time - std::floorf(time);
-
-		switch (osc) {
-		case SQUARE: return (time < 0.5f) ? 1.0f : 0.0f;
-		case TRIANGLE: return (time < 0.5f) ? (time * 2.0f) : (2.0f - 2.0f * time);
-		case SINE: return 0.5f * (std::sinf(time * 2.0f * std::numbers::pi_v<float>) + 1.0f);
-		case SAWTOOTH: return time;
-		case NOISE: return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
-		}
-
-		return 0.f;
-	}
-
-	inline void scale_float_array(float *arr, const uint32_t n, const float factor) {
-		if (factor == 1.f) return;
-		for (uint32_t i = 0; i < n; ++i) arr[i] *= factor;
-	}
-
-	inline void mono_to_stereo(const float *mono_array, float *stereo_array, const uint16_t samples) {
-		for (uint16_t i = 0; i < samples; ++i) {
-			stereo_array[i * 2] = mono_array[i];
-			stereo_array[(i * 2) + 1] = mono_array[i];
-		}
-	}
-} // namespace YourSound::BinPlayer

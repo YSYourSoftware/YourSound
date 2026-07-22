@@ -12,7 +12,7 @@ target_link_libraries(YSQuickSample PRIVATE
 )
 
 if(WIN32)
-	target_sources(YSQuickSample PRIVATE app.rc)
+	target_sources(YSQuickSample PRIVATE app.rc ../shared.rc)
 	target_link_options(YSQuickSample PRIVATE
 		"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 	)

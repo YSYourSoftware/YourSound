@@ -7,7 +7,7 @@ using namespace YourSound::BinPlayer;
 static void imgui_basic_oscillator_dropdown(BasicOscillator *osc, const char *label) {
 	uint8_t current = *osc;
 
-	const char *osc_names[5] = {"Square", "Triangle", "Sine", "Sawtooth", "Noise"};
+	static const char *osc_names[5] = {"Square", "Triangle", "Sine", "Sawtooth", "Noise"};
 
 	if (ImGui::BeginCombo(label, osc_names[current])) {
 		for (uint16_t i = 0; i < 5; i++) {
@@ -52,6 +52,11 @@ void BasicOSCPlayer::render(float *output_buffer, const uint16_t number_samples)
 void BasicOSCPlayer::set_parameter(const char *param_id, const float value) {
 	if (std::strcmp(param_id, "osc") == 0) m_osc = static_cast<BasicOscillator>(std::roundf(value * 4));
 	else if (std::strcmp(param_id, "_pitch_bend")) m_pitch_bend = value * 2.f - 1.f;
+}
+
+float BasicOSCPlayer::get_parameter(const char *param_id) {
+	if (std::strcmp(param_id, "osc") == 0) return static_cast<uint8_t>(m_osc) / 4.f;
+	return 0.f;
 }
 
 void BasicOSCPlayer::render_graphics() {

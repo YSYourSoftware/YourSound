@@ -68,7 +68,7 @@ void window_install_confirm() {
 		}
 
 		if (ImGui::CollapsingHeader("Signature Info")) {
-			ImGui::Text("Signed: %s\nMethod: %s", "Samuel Plimmer", "GPG (no CA)");
+			ImGui::Text("Signed: %s\nMethod: %s", "...", "GPG (no CA)");
 			ImGui::TextLinkOpenURL("About archive signing", "https://YourSoftware.org/projects/YourSound/help/sarc-signing");
 		}
 

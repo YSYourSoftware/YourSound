@@ -1,5 +1,7 @@
 #include "YourSound/IntegratedPlayers/LuaPlayers.hpp"
+
 #include "YourSound/BinPlayerInterface.hpp"
+#include "YourSound/Serialisation.hpp"
 #include "YourSound/UI/Colours.hpp"
 #include "YourSound/UI/Fonts.hpp"
 
@@ -108,6 +110,11 @@ void Integrated::BinPlayerLua::set_bpm(uint16_t value) { p_emit("setBPM", value)
 void Integrated::BinPlayerLua::set_sample_rate(uint32_t value) { p_emit("setSampleRate", value); }
 void Integrated::BinPlayerLua::set_parameter(const char *param_id, const float value) {
 	p_emit_param(std::string(param_id), value);
+}
+
+float Integrated::BinPlayerLua::get_parameter(const char *param_id) {
+	//  TODO!!
+	return 0.f;
 }
 
 uint8_t Integrated::BinPlayerLua::get_parameter_count() {
@@ -242,7 +249,7 @@ void Integrated::BinPlayerLua::p_store_number(lua_Number number) {
 		return;
 	}
 
-	std::memcpy(m_store_data_pos, reinterpret_cast<double *>(&number), 8);
+	YourSound::write_float_be<double>(m_store_data_pos, number);
 	m_store_data_pos += 8;
 }
 
@@ -253,9 +260,7 @@ std::string Integrated::BinPlayerLua::p_load_string() {
 }
 
 lua_Number Integrated::BinPlayerLua::p_load_number() {
-	double number;
-
-	std::memcpy(&number, m_load_data, 8);
+	const double number = YourSound::read_float_be<double>(m_load_data);
 	m_load_data += 8;
 
 	return static_cast<lua_Number>(number);

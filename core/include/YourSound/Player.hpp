@@ -48,6 +48,7 @@ namespace YourSound {
 		using set_sample_rate_t = void (*)(YS_PlayerHandle, uint32_t);
 
 		using set_parameter_t = void (*)(YS_PlayerHandle, const char *, float);
+		using get_parameter_t = float (*)(YS_PlayerHandle, const char *);
 		using get_parameters_t = void (*)(YS_PlayerHandle, const char **);
 		using get_parameter_count_t = uint8_t (*)(YS_PlayerHandle);
 
@@ -70,6 +71,7 @@ namespace YourSound {
 		set_sample_rate_t set_sample_rate = nullptr;
 
 		set_parameter_t set_parameter = nullptr;
+		get_parameter_t get_parameter = nullptr;
 		get_parameters_t get_parameters = nullptr;
 		get_parameter_count_t get_parameter_count = nullptr;
 
@@ -97,6 +99,7 @@ namespace YourSound {
 		virtual void set_sample_rate(uint32_t value) = 0;
 
 		virtual void set_parameter(const char *param_id, float value) = 0;
+		[[nodiscard]] virtual float get_parameter(const char *param_id) = 0;
 		virtual void get_parameters(const char **buffer) = 0;
 		[[nodiscard]] virtual uint8_t get_parameter_count() = 0;
 
@@ -130,6 +133,7 @@ namespace YourSound {
 		void set_sample_rate(uint32_t value) override;
 
 		void set_parameter(const char *param_id, float value) override;
+		[[nodiscard]] float get_parameter(const char *param_id) override;
 		void get_parameters(const char **buffer) override;
 		[[nodiscard]] uint8_t get_parameter_count() override;
 
@@ -167,26 +171,6 @@ namespace YourSound {
 
 	class PlayerWrapperInterface : public PlayerWrapper, public PlayerInterface {
 		PlayerWrapperInterface(YS_PlayerWrapperHandle player_wrapper_handle, const std::filesystem::path &dll_path);
-	};
-
-	class Resource {
-	public:
-		virtual ~Resource() = default;
-
-		[[nodiscard]] virtual uint64_t store_calc_size(bool store_reference) = 0;
-		virtual void store(uint8_t *output_buffer, bool store_reference) = 0;
-		virtual void load(const uint8_t *input_buffer) = 0;
-		virtual void reload_file() = 0;
-
-		void set_path(const std::filesystem::path &path) { m_path = path; }
-
-		size_t get_length() { return m_data.size(); }
-
-		uint8_t *pointer() { return m_data.data(); }
-	protected:
-		std::vector<uint8_t> m_data;
-		std::filesystem::path m_path;
-		bool m_force_embedded = false;
 	};
 
 	[[nodiscard]] YS_CORE_EXPORT_NO_EXTERN PlayerInterface *load_binary_player(const std::filesystem::path &dll_path,

@@ -5,19 +5,18 @@
 
 static constexpr uint8_t TRIANGLE_TABLE[32] = {15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5,  4,  3,  2,  1,  0,
 											   0,  1,  2,  3,  4,  5,  6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-static constexpr bool DUTY_TABLE[4][8] = {
+static constexpr uint8_t DUTY_TABLE[4] = {
 	// 12.5%
-	{false, true, false, false, false, false, false, false},
+	0b01000000,
 
 	// 25%
-	{false, true, true, false, false, false, false, false},
+	0b01100000,
 
 	// 50%
-	{false, true, true, true, true, false, false, false},
+	0b01111000,
 
 	// 75%
-	{true, false, false, true, true, true, true, true},
-};
+	0b10011111};
 
 static constexpr uint16_t NOISE_PERIOD_TABLE[16] = {4,	 8,	  16,  32,	64,	 96,   128,	 160,
 													202, 254, 380, 508, 762, 1016, 2034, 4068};
@@ -28,6 +27,7 @@ void BinPlayer2A03::note_on(const uint8_t midi_note_number, float velocity) {
 	m_frequency = YourSound::BinPlayer::midi_to_freq(midi_note_number);
 	m_noise_period = 15 - std::min<uint8_t>(midi_note_number % 16, 15);
 	m_noise_timer = NOISE_PERIOD_TABLE[m_noise_period];
+	m_volume = velocity;
 }
 
 void BinPlayer2A03::note_off(uint8_t midi_note_number) { m_frequency = NAN; }
@@ -45,7 +45,11 @@ void BinPlayer2A03::render(float *output_buffer, const uint16_t number_samples) 
 	uint8_t sample = 0;
 	for (uint16_t i = 0; i < number_samples; i++) {
 		switch (m_waveform) {
-		case PULSE: sample = DUTY_TABLE[m_duty_cycle][static_cast<uint8_t>(m_phase * 8.f)] ? 15 : 0; break;
+		case PULSE:
+			sample = (DUTY_TABLE[m_duty_cycle] >> (7 - std::min<uint8_t>(static_cast<uint8_t>(m_phase * 8.0f), 7))) & 1
+						 ? 15
+						 : 0;
+			break;
 		case TRIANGLE: sample = TRIANGLE_TABLE[static_cast<uint8_t>(m_phase * 32.f)]; break;
 		case NOISE: sample = (m_lfsr & 1) ? 0 : 15; break;
 		}
@@ -69,6 +73,8 @@ void BinPlayer2A03::render(float *output_buffer, const uint16_t number_samples) 
 			while (m_phase >= 1.f) m_phase -= 1.f;
 		}
 	}
+
+	YourSound::BinPlayer::scale_float_array(output_buffer, number_samples * 2, m_volume);
 }
 
 void BinPlayer2A03::store(uint8_t *output_buffer, bool store_reference) {
@@ -85,6 +91,11 @@ void BinPlayer2A03::load(const uint8_t *input_buffer) {
 
 void BinPlayer2A03::set_parameter(const char *param_id, const float value) {
 	if (std::strcmp(param_id, "duty_cycle") == 0) m_duty_cycle = static_cast<DutyCycle>(std::roundf(value * 3.f));
+}
+
+float BinPlayer2A03::get_parameter(const char *param_id) {
+	if (std::strcmp(param_id, "duty_cycle") == 0) return static_cast<uint8_t>(m_duty_cycle) / 3.f;
+	return 0.f;
 }
 
 void BinPlayer2A03::get_parameters(const char **buffer) { buffer[0] = "duty_cycle"; }

@@ -1,10 +1,10 @@
 #include "BinPlayerHexwave.hpp"
 
 #define STB_HEXWAVE_IMPLEMENTATION
-#include <stb_hexwave.h>
 #include <YourSound/BinPlayerSTD.hpp>
 #include <YourSound/Serialisation.hpp>
 #include <YourSound/UI/Controls.hpp>
+#include <stb_hexwave.h>
 
 #include <iostream>
 
@@ -62,23 +62,32 @@ void BinPlayerHexwave::load(const uint8_t *input_buffer) {
 
 void BinPlayerHexwave::set_sample_rate(const uint32_t value) { m_sample_rate = value; }
 void BinPlayerHexwave::set_parameter(const char *param_id, const float value) {
-	if (std::strcmp(param_id, "reflect") == 0) {
+	if (std::strcmp(param_id, "reflect") == 0 || std::strcmp(param_id, "_qparam_buttonlike_toggle_1") == 0) {
 		if (value >= 0.5) m_reflect = true;
 		else m_reflect = false;
 		p_update_params();
-	} else if (std::strcmp(param_id, "peak_time") == 0) {
+	} else if (std::strcmp(param_id, "peak_time") == 0 || std::strcmp(param_id, "_qparam_wheellike_1") == 0) {
 		m_peak_time = value;
 		p_update_params();
-	} else if (std::strcmp(param_id, "half_height") == 0) {
+	} else if (std::strcmp(param_id, "half_height") == 0 || std::strcmp(param_id, "_qparam_wheellike_2") == 0) {
 		m_half_height = value * 2.f - 1.f;
 		p_update_params();
-	} else if (std::strcmp(param_id, "zero_wait") == 0) {
+	} else if (std::strcmp(param_id, "zero_wait") == 0 || std::strcmp(param_id, "_qparam_wheellike_3") == 0) {
 		m_zero_wait = value;
 		p_update_params();
-	}
+	} else if (std::strcmp(param_id, "_pitch_bend") == 0) m_pitch_bend = value * 2.f - 1.f;
+}
 
-	else if (std::strcmp(param_id, "_pitch_bend") == 0)
-		m_pitch_bend = value * 2.f - 1.f;
+float BinPlayerHexwave::get_parameter(const char *param_id) {
+	if (std::strcmp(param_id, "reflect") == 0 || std::strcmp(param_id, "_qparam_buttonlike_toggle_1") == 0)
+		return m_reflect ? 1.f : 0.f;
+	if (std::strcmp(param_id, "peak_time") == 0 || std::strcmp(param_id, "_qparam_wheellike_1") == 0)
+		return m_peak_time;
+	if (std::strcmp(param_id, "half_height") == 0 || std::strcmp(param_id, "_qparam_wheellike_2") == 0)
+		return (m_half_height + 1.f) * 0.5f;
+	if (std::strcmp(param_id, "zero_wait") == 0 || std::strcmp(param_id, "_qparam_wheellike_3") == 0)
+		return m_zero_wait;
+	return 0.f;
 }
 
 void BinPlayerHexwave::get_parameters(const char **buffer) {

@@ -15,30 +15,6 @@
 			"frontFacing": true,
 			"actions": []
 		}, {
-			"id": "org.yoursoftware.sound.sf2",
-			"sharedLibraryKey": "all",
-			"name": "SoundFont Player",
-			"frontFacing": false,
-			"actions": [
-				{
-					"symbol": "action_import_sf2",
-					"pass": [
-						{
-							"type": "filepath",
-							"extensions": [{"name": "SoundFont Files", "extension": "sf2"}]
-						}
-					], "name": "Import SF2..."
-				}, {
-					"symbol": "action_load_sf2",
-					"pass": [
-						{
-							"type": "filepath",
-							"extensions": [{"name": "SoundFont Files", "extension": "sf2"}]
-						}, {"type": "rack"}
-					], "name": "Load SF2..."
-				}
-			]
-		}, {
 			"id": "org.yoursoftware.sound.hexwave",
 			"sharedLibraryKey": "all",
 			"name": "HexWave Player",
@@ -46,7 +22,13 @@
 		}, {
 			"id": "org.yoursoftware.sound.2a03",
 			"sharedLibraryKey": "all",
-			"name": "2A03 Emulator"
+			"name": "2A03 Player",
+			"frontFacing": true
+		}, {
+			"id": "org.yoursoftware.sound.wavetable",
+			"sharedLibraryKey": "all",
+			"name": "Wavetable Player",
+			"frontFacing": true
 		}
 	], "binPlayerCompat": [
 		"windows",

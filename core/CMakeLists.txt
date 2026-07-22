@@ -9,9 +9,12 @@ target_compile_definitions(YourSound PRIVATE YS_IN_CORE_BUILD SOL_ALL_SAFETIES_O
 target_compile_features(YourSound PUBLIC cxx_std_23)
 target_include_directories(YourSound PUBLIC
 	include
-	../lib/dr_libs
 	../lib/SArc/include
 )
+
+if(WIN32)
+	target_sources(YourSound PRIVATE ../shared.rc)
+endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LuaJIT REQUIRED IMPORTED_TARGET luajit)
@@ -25,11 +28,10 @@ else()
 endif()
 
 target_link_libraries(YourSound PUBLIC
-	dr_libs_interface
 	nlohmann_json
 	SArc
-	sol2
 	PkgConfig::LuaJIT
+	sol2
 	PRIVATE
 	ImGui_Core
 )

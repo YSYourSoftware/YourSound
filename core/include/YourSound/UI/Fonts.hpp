@@ -5,6 +5,8 @@
 #include <imgui.h>
 
 namespace YourSound::UI {
+	inline ImFont *g_imgui_standard_font_medium;
+	inline ImFont *g_imgui_standard_font_large;
 	inline ImFont *g_imgui_icon_font;
 	inline ImFont *g_imgui_icon_font_large;
 	inline ImFont *g_imgui_mono_font;
@@ -14,6 +16,8 @@ namespace YourSound::UI {
 
 	inline YS_CORE_EXPORT_NO_EXTERN void imgui_load_fonts(const ImGuiIO &io) {
 		io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf");
+		g_imgui_standard_font_large = io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf", 64.f);
+		g_imgui_standard_font_medium = io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf", 32.f);
 
 		ImFontConfig config;
 		config.MergeMode = true;

@@ -9,14 +9,12 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
-#include <iostream>
-
 using namespace YourSound::BinPlayer;
 
 static void imgui_basic_oscillator_dropdown(BasicOscillator *osc, const char *label) {
 	uint8_t current = *osc;
 
-	const char *osc_names[5] = {"Square", "Triangle", "Sine", "Sawtooth", "Noise"};
+	static const char *osc_names[5] = {"Square", "Triangle", "Sine", "Sawtooth", "Noise"};
 
 	if (ImGui::BeginCombo(label, osc_names[current])) {
 		for (uint16_t i = 0; i < 5; i++) {
@@ -55,7 +53,7 @@ void ModLFO::render(float *output_buffer, const uint16_t number_samples) {
 
 		m_player->render(output_buffer + (i * 2), 1 /*chunk_size*/);
 
-		// i += chunk_size;
+		// i += chunk_size - 1;
 	}
 }
 
@@ -207,9 +205,9 @@ void ModLFO::render_graphics() {
 		ImGui::PushStyleColor(ImGuiCol_Button, UI::Colours::BUTTON_RED);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::Colours::BUTTON_RED_HOVER);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::Colours::BUTTON_RED_ACTIVE);
-		ImGui::PushFont(UI::g_imgui_icon_font);
+		ImGui::PushFont(UI::g_imgui_standard_font_medium);
 
-		if (ImGui::Button(ICON_FA_XMARK, ImVec2(26.f, 26.f))) {
+		if (ImGui::Button("×", ImVec2(26.f, 26.f))) {
 			lfo = m_lfos.erase(lfo);
 			ImGui::PopFont();
 			ImGui::PopStyleColor(3);
@@ -232,18 +230,17 @@ void ModLFO::render_graphics() {
 		ImGui::DragFloat("Scale", &lfo->scale, 0.01f, 0.f, 1.f, "%.2f");
 
 		ImGui::EndChild();
-
 		ImGui::SameLine();
 		++lfo;
 	}
 
-	if (m_lfos.size() < 255) {
+	if (m_lfos.size() < UINT8_MAX) {
 		ImGui::PushStyleColor(ImGuiCol_Button, UI::Colours::BUTTON_GREEN);
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, UI::Colours::BUTTON_GREEN_HOVER);
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, UI::Colours::BUTTON_GREEN_ACTIVE);
-		ImGui::PushFont(UI::g_imgui_icon_font_large);
+		ImGui::PushFont(UI::g_imgui_standard_font_large);
 
-		if (ImGui::Button(ICON_FA_PLUS, ImVec2(200.f, 200.f))) m_lfos.resize(m_lfos.size() + 1);
+		if (ImGui::Button("+", ImVec2(200.f, 200.f))) m_lfos.resize(m_lfos.size() + 1);
 
 		ImGui::PopFont();
 		ImGui::PopStyleColor(3);
@@ -258,11 +255,12 @@ void ModLFO::reset() {
 }
 
 void ModLFO::p_apply_lfos() const {
-	for (const LFOInfo &lfo : m_lfos) {
-		if (lfo.bpm_synced) continue;
-		const float value =
-			lfo.reversed ? lfo.anchor + (1.f - calculate_basic_osc(lfo.osc, m_time_position * lfo.rate)) * lfo.scale
-						 : lfo.anchor + calculate_basic_osc(lfo.osc, m_time_position * lfo.rate) * lfo.scale;
-		m_player->set_parameter(lfo.param_id.c_str(), value);
+	for (const auto &[param_id, rate, anchor, scale, bpm_synced, reversed, osc] : m_lfos) {
+		float time_pos = bpm_synced ? m_time_position * (m_bpm / 60.f) : m_time_position;
+		time_pos = time_pos - std::floorf(time_pos);
+
+		const float value = reversed ? anchor + (1.f - calculate_basic_osc(osc, time_pos * rate)) * scale
+									 : anchor + calculate_basic_osc(osc, time_pos * rate) * scale;
+		m_player->set_parameter(param_id.c_str(), std::clamp(value, 0.f, 1.f));
 	}
 }

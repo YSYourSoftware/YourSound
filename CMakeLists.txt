@@ -32,6 +32,10 @@ add_subdirectory(lib)
 
 add_subdirectory(core)
 
+if(YS_BUILD_PLUGIN OR YS_BUILD_INSTALL OR YS_BUILD_QUICKSAMPLE)
+	add_subdirectory(kbd-mapping-handler)
+endif()
+
 if(YS_BUILD_PLUGIN)
 	add_subdirectory(plugin)
 endif()
