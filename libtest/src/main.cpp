@@ -301,30 +301,30 @@ int main(const int argc, char *argv[]) {
 		midi_map_json_file.read(midi_map_json.data(), midi_map_json.size());
 	}
 
-	YSMKH::MIDIMapping::param_set_callback_t mm_param_set_cb = [](const std::string &id, const float value) {
+	YSKMH::MIDIMapping::param_set_callback_t mm_param_set_cb = [](const std::string &id, const float value) {
 		bin_player->set_parameter(id.c_str(), value);
 		if (id == "_midi_cc_1") mod_wheel = value;
 		else if (id == "_midi_cc_11") expression_wheel = value;
 	};
 
-	YSMKH::MIDIMapping::param_get_callback_t mm_param_get_cb = [](const std::string &id) -> float {
+	YSKMH::MIDIMapping::param_get_callback_t mm_param_get_cb = [](const std::string &id) -> float {
 		return bin_player->get_parameter(id.c_str());
 	};
 
-	YSMKH::MIDIMapping::note_on_callback_t mm_note_on_cb = [](const uint8_t channel, const uint8_t note,
+	YSKMH::MIDIMapping::note_on_callback_t mm_note_on_cb = [](const uint8_t channel, const uint8_t note,
 															  const float velocity) {
 		if (channel != 0) return;
 		keys_pressed[note] = true;
 		bin_player->note_on(note, velocity);
 	};
 
-	YSMKH::MIDIMapping::note_off_callback_t mm_note_off_cb = [](const uint8_t channel, const uint8_t note) {
+	YSKMH::MIDIMapping::note_off_callback_t mm_note_off_cb = [](const uint8_t channel, const uint8_t note) {
 		if (channel != 0) return;
 		keys_pressed[note] = false;
 		bin_player->note_off(note);
 	};
 
-	YSMKH::MIDIMapping midi_mapping{midi_map_json,
+	YSKMH::MIDIMapping midi_mapping{midi_map_json,
 									"keyboard-mappings/Arturia",
 									mm_param_set_cb,
 									mm_param_get_cb,

@@ -1,26 +1,25 @@
 ---@meta
 
----@class UI
-local UI = {}
+local ui = {}
 
 --- Create a text block.
 ---
 ---@param text string
-function UI:text(text)
+function ui.text(text)
 end
 
 --- Create a button.
 ---
 ---@param text string
 ---@param callback fun()
-function UI:button(text, callback)
+function ui.button(text, callback)
 end
 
 --- Create a checkbox.
 ---
 ---@param currentValue boolean
 ---@param callback fun(value: boolean)
-function UI:checkbox(currentValue, callback)
+function ui.checkbox(currentValue, callback)
 end
 
 --- Create a numerical slider (fader).
@@ -30,7 +29,7 @@ end
 ---@param maxValue number
 ---@param inputStep number
 ---@param callback fun(value: number)
-function UI:slider(currentValue, minValue, maxValue, inputStep, callback)
+function ui.slider(currentValue, minValue, maxValue, inputStep, callback)
 end
 
 --- Create a numerical knob (encoder).
@@ -40,14 +39,10 @@ end
 ---@param maxValue number
 ---@param inputStep number
 ---@param callback fun(value: number)
-function UI:knob(currentValue, minValue, maxValue, inputStep, callback)
+function ui.knob(currentValue, minValue, maxValue, inputStep, callback)
 end
 
----@type UI
-ui = nil
-
----@class Player
-local Player = {}
+local player = {}
 
 --- Bind to an action. Valid actions are:
 --- ```lua
@@ -67,7 +62,7 @@ local Player = {}
 ---
 ---@param action string
 ---@param callback fun(...)
-function Player:bind(action, callback)
+function player.bind(action, callback)
 end
 
 --- Bind to a parameter. Value is from `0.0` to `1.0`.
@@ -76,62 +71,62 @@ end
 ---
 ---@param param string
 ---@param callback fun(value: number)
-function Player:bindParam(param, callback)
+function player.bindParam(param, callback)
 end
 
 --- Log a message.
 ---
 ---@param message string
-function Player:log(message)
+function player.log(message)
 end
 
 --- Log a warning message.
 ---
 ---@param message string
-function Player:warn(message)
+function player.warn(message)
 end
 
 --- Log an error message and display an error box to the user.
 ---
 ---@param message string
-function Player:error(message)
+function player.error(message)
 end
 
 --- Throw an exception, display an error box to the user, and stop execution of code.
 ---
 ---@param message string
-function Player:exception(message)
+function player.exception(message)
 end
 
 --- Write a sample pair (`-1.0` - `1.0`).
 ---
 ---@param left number Left channel sample
 ---@param right number Right channel sample
-function Player:writeSamples(left, right)
+function player.writeSamples(left, right)
 end
 
 --- Store a null-terminated UTF-8 string in recall data.
 ---
 ---@param value string
-function Player:storeString(value)
+function player.storeString(value)
 end
 
 --- Store a 64-bit floating-point number in recall data.
 ---
 ---@param value number
-function Player:storeNumber(value)
+function player.storeNumber(value)
 end
 
 --- Load a null-terminated UTF-8 string from recall data.
 ---
 ---@return string
-function Player:loadString()
+function player.loadString()
 end
 
 --- Load a 64-bit floating-point number from recall data.
 ---
 ---@return number
-function Player:loadNumber()
+function player.loadNumber()
 end
 
 --- Register a new parameter.
@@ -139,8 +134,8 @@ end
 --- this only needs to be used to allow the parameter to appear in the built-in UI.
 ---
 ---@param param string
-function Player:registerParam(param)
+function player.registerParam(param)
 end
 
----@type Player
-player = nil
+---@class Vec2
+local Vec = {}

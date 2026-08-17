@@ -13,6 +13,6 @@ namespace YourSound::BinPlayer {
 	inline std::unordered_map<std::string, std::function<Player*()>> g_bp_registry;
 	inline std::function g_error_func = default_error_func;
 
-	inline YS_CORE_EXPORT_NO_EXTERN void set_error_func(const std::function<void(const char*)> &func) {g_error_func = func;}
-	inline YS_CORE_EXPORT_NO_EXTERN void register_player(const std::string &player_id, const std::function<Player*()> &create_func) {g_bp_registry[player_id] = create_func;}
+	inline YS_API void set_error_func(const std::function<void(const char*)> &func) {g_error_func = func;}
+	inline YS_API void register_player(const std::string &player_id, const std::function<Player*()> &create_func) {g_bp_registry[player_id] = create_func;}
 }

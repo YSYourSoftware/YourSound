@@ -2,18 +2,18 @@
 
 #ifdef YSKMH_LIBRARY_BUILD
 #ifdef _WIN32
-#define YSMKH_API __declspec(dllexport)
+#define YSKMH_API __declspec(dllexport)
 #elifdef __GNUC__
-#define YSMKH_API __attribute__((visibility("default")))
+#define YSKMH_API __attribute__((visibility("default")))
 #else
-#define YSMKH_API
+#define YSKMH_API
 #endif
 #else
 #ifdef _WIN32
-#define YSMKH_API __declspec(dllimport)
+#define YSKMH_API __declspec(dllimport)
 #elifdef __GNUC__
-#define YSMKH_API __attribute__((visibility("default")))
+#define YSKMH_API __attribute__((visibility("default")))
 #else
-#define YSMKH_API
+#define YSKMH_API
 #endif
 #endif

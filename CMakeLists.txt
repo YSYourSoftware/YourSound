@@ -23,7 +23,24 @@ elseif(GCC OR CLANG)
 	add_link_options($<$<CONFIG:Debug>:-fsanitize=address>)
 endif()
 
-option(YS_BUILD_PLUGIN "Build Plugin" OFF)
+set(YS_PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+function(add_target_resource TARGET_NAME PRODUCT_NAME FILE_DESCRIPTION)
+	set(RC_PRODUCT_NAME "${PRODUCT_NAME}")
+	set(RC_FILE_DESCRIPTION "${FILE_DESCRIPTION}")
+
+	set(OUTPUT_RC "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_shared.rc")
+
+	configure_file(
+		"${YS_PROJECT_ROOT}/shared.rc.in"
+		"${OUTPUT_RC}"
+		@ONLY
+	)
+
+	target_sources(${TARGET_NAME} PRIVATE "${OUTPUT_RC}")
+endfunction()
+
+option(YS_BUILD_PLUGIN "Build DAW Plugins (CLAP, VST3 & AUv3)" OFF)
 option(YS_BUILD_INSTALL "Build Application installer and Library Manager" OFF)
 option(YS_BUILD_FACTORY "Build Factory Binary Players" OFF)
 option(YS_BUILD_QUICKSAMPLE "Build YourSound QuickSample" OFF)

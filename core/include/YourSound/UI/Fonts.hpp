@@ -14,7 +14,7 @@ namespace YourSound::UI {
 
 	static constexpr ImWchar ICONS_RANGES[] = {0xe000, 0xf8ff, 0};
 
-	inline YS_CORE_EXPORT_NO_EXTERN void imgui_load_fonts(const ImGuiIO &io) {
+	inline YS_API void imgui_load_fonts(const ImGuiIO &io) {
 		io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf");
 		g_imgui_standard_font_large = io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf", 64.f);
 		g_imgui_standard_font_medium = io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf", 32.f);

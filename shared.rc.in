@@ -11,10 +11,10 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName",      "YourSoftware Foundation LTD"
-            VALUE "FileDescription",  "A part of the YourSound suite."
-            VALUE "LegalCopyright",   "Copyright (C) 2026 YourSoftware Foundation"
-            VALUE "ProductName",      "YourSound"
+            VALUE "CompanyName",      "YourSoftware Foundation"
+            VALUE "FileDescription",  "@RC_FILE_DESCRIPTION@"
+            VALUE "LegalCopyright",   "\xa9 2026 YourSoftware Foundation Ltd."
+            VALUE "ProductName",      "@RC_PRODUCT_NAME@"
         END
     END
     BLOCK "VarFileInfo"

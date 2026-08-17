@@ -166,15 +166,15 @@ namespace YourSound {
 		const std::filesystem::path m_dll_path;
 		PlayerAPI m_player_api;
 
-		friend YS_CORE_EXPORT_NO_EXTERN void free_binary_player(const PlayerInterface *binary_player);
+		friend YS_API void free_binary_player(const PlayerInterface *binary_player);
 	};
 
 	class PlayerWrapperInterface : public PlayerWrapper, public PlayerInterface {
 		PlayerWrapperInterface(YS_PlayerWrapperHandle player_wrapper_handle, const std::filesystem::path &dll_path);
 	};
 
-	[[nodiscard]] YS_CORE_EXPORT_NO_EXTERN PlayerInterface *load_binary_player(const std::filesystem::path &dll_path,
+	[[nodiscard]] YS_API PlayerInterface *load_binary_player(const std::filesystem::path &dll_path,
 																			   const std::string &player_id);
-	[[nodiscard]] YS_CORE_EXPORT_NO_EXTERN Player *load_player_by_id(const std::string &player_id);
-	[[nodiscard]] YS_CORE_EXPORT_NO_EXTERN PlayerWrapper *load_player_wrapper_by_id(const std::string &player_id);
+	[[nodiscard]] YS_API Player *load_player_by_id(const std::string &player_id);
+	[[nodiscard]] YS_API PlayerWrapper *load_player_wrapper_by_id(const std::string &player_id);
 } // namespace YourSound

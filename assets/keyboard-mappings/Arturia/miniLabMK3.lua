@@ -1,5 +1,4 @@
--- TODO: knob1-8 - these are endless encoder wheels, so update BPI to include get_parameter_value() and increment/decrement (larger steps if shift is held)
--- TODO: idea: have central wheel click + scroll do something different
+-- TODO: have central wheel click + scroll do something different
 
 local shifting = false
 
@@ -48,66 +47,85 @@ controller.bind("centralWheel_click_shift", function(value)
 	end
 end)
 
+local stepShifting = 0.002
+local stepNormal = 0.02
+
 controller.bind("knob1", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_1", inputPlayer.getParam("_qparam_wheellike_1") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_1",
+			inputPlayer.getParam("_qparam_wheellike_1") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_1", inputPlayer.getParam("_qparam_wheellike_1") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_1",
+			inputPlayer.getParam("_qparam_wheellike_1") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob2", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_2", inputPlayer.getParam("_qparam_wheellike_2") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_2",
+			inputPlayer.getParam("_qparam_wheellike_2") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_2", inputPlayer.getParam("_qparam_wheellike_2") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_2",
+			inputPlayer.getParam("_qparam_wheellike_2") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob3", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_3", inputPlayer.getParam("_qparam_wheellike_3") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_3",
+			inputPlayer.getParam("_qparam_wheellike_3") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_3", inputPlayer.getParam("_qparam_wheellike_3") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_3",
+			inputPlayer.getParam("_qparam_wheellike_3") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob4", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_4", inputPlayer.getParam("_qparam_wheellike_4") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_4",
+			inputPlayer.getParam("_qparam_wheellike_4") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_4", inputPlayer.getParam("_qparam_wheellike_4") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_4",
+			inputPlayer.getParam("_qparam_wheellike_4") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob5", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_5", inputPlayer.getParam("_qparam_wheellike_5") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_5",
+			inputPlayer.getParam("_qparam_wheellike_5") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_5", inputPlayer.getParam("_qparam_wheellike_5") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_5",
+			inputPlayer.getParam("_qparam_wheellike_5") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob6", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_6", inputPlayer.getParam("_qparam_wheellike_6") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_6",
+			inputPlayer.getParam("_qparam_wheellike_6") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_6", inputPlayer.getParam("_qparam_wheellike_6") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_6",
+			inputPlayer.getParam("_qparam_wheellike_6") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob7", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_7", inputPlayer.getParam("_qparam_wheellike_7") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_7",
+			inputPlayer.getParam("_qparam_wheellike_7") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_7", inputPlayer.getParam("_qparam_wheellike_7") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_7",
+			inputPlayer.getParam("_qparam_wheellike_7") - (shifting and stepShifting or stepNormal))
 	end
 end)
 
 controller.bind("knob8", function(value)
 	if value >= 0.5 then
-		inputPlayer.updateParam("_qparam_wheellike_8", inputPlayer.getParam("_qparam_wheellike_8") + 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_8",
+			inputPlayer.getParam("_qparam_wheellike_8") + (shifting and stepShifting or stepNormal))
 	else
-		inputPlayer.updateParam("_qparam_wheellike_8", inputPlayer.getParam("_qparam_wheellike_8") - 0.02)
+		inputPlayer.updateParam("_qparam_wheellike_8",
+			inputPlayer.getParam("_qparam_wheellike_8") - (shifting and stepShifting or stepNormal))
 	end
 end)

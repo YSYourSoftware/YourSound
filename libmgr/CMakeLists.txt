@@ -20,7 +20,8 @@ target_link_libraries(YSLibMgr PRIVATE
 target_compile_definitions(YSLibMgr PRIVATE $<$<CONFIG:Debug>:YSL_DEBUG>)
 
 if(WIN32)
-	target_sources(YSLibMgr PRIVATE app.rc ../shared.rc)
+	target_sources(YSLibMgr PRIVATE app.rc)
+	add_target_resource(YSLibMgr "YourSound Library Manager" "Install and configure YourSound Libraries.")
 	target_link_options(YSLibMgr PRIVATE
 		"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 	)

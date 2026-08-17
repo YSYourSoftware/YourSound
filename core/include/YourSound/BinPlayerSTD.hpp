@@ -1,10 +1,10 @@
 #pragma once
 
 #include "YourSound/Player.hpp"
+#include "YourSound/UI/Controls.hpp"
 #include "YourSound/Version.hpp"
 
 #include <cstdint>
-#include <format>
 #include <iostream>
 #include <numbers>
 #include <source_location>
@@ -66,7 +66,7 @@
 	}                                                                                                                  \
                                                                                                                        \
 	YS_EXTERN_EXPORT float player_get_parameter(YS_PlayerHandle player, const char *param_id) {                        \
-		return static_cast<YourSound::Player *>(player)->get_parameter(param_id);                                             \
+		return static_cast<YourSound::Player *>(player)->get_parameter(param_id);                                      \
 	}                                                                                                                  \
                                                                                                                        \
 	YS_EXTERN_EXPORT void player_get_parameters(YS_PlayerHandle player, const char **buffer) {                         \
@@ -115,7 +115,7 @@ namespace YourSound {
 	};
 
 	inline ErrorSource get_error_source(const std::source_location &location = std::source_location::current()) {
-		ErrorSource result;
+		ErrorSource result{};
 
 		result.function_name = location.function_name();
 		result.file_name = location.file_name();
@@ -127,12 +127,21 @@ namespace YourSound {
 	namespace BinPlayer {
 		enum BasicOscillator : uint8_t { SQUARE = 0, TRIANGLE = 1, SINE = 2, SAWTOOTH = 3, NOISE = 4 };
 
-		typedef struct AmpEnvelope {
-			float attack_time = 0.25f;
-			float decay_time = 0.25f;
-			float sustain_volume = 0.75f;
-			float release_time = 0.5f;
+		typedef struct s_AmpEnvelope {
+			float attack_time = 0.f;
+			float decay_time = 0.f;
+			float sustain_volume = 1.f;
+			float release_time = 0.f;
 		} amp_envelope_t;
+
+		typedef struct s_FilterEnvelope {
+			float attack_time = 0.f;
+			float decay_time = 0.f;
+			float sustain_level = 1.f;
+			float release_time = 0.f;
+			float amount = 0.f; // -1.f - +1.f
+			float base_cutoff = 1.f;
+		} filter_envelope_t;
 
 		[[nodiscard]] inline float midi_to_freq(const uint8_t midi_note, const float pitch_bend = 0.f,
 												const float tuning = 440.f) {
@@ -173,6 +182,39 @@ namespace YourSound {
 			return 0.f;
 		}
 
+		inline void amp_envelope_edit_ui(amp_envelope_t &envelope) {
+			const float drag_widths = 75.f - (ysbp_ui_get_item_spacing().x / 2.f);
+
+			ysbp_ui_set_next_item_width(drag_widths);
+			ysbp_ui_float_drag("##amp_a", &envelope.attack_time, 0.05f, 0.f, 10.f, "%.2fs");
+			ysbp_ui_same_line();
+			ysbp_ui_set_next_item_width(drag_widths);
+			ysbp_ui_float_drag("##amp_d", &envelope.decay_time, 0.05f, 0.f, 10.f, "%.2fs");
+
+			ysbp_ui_line_graph(
+				"",
+				[](void *data, const int idx) -> float {
+					const amp_envelope_t *amp_env = static_cast<amp_envelope_t *>(data);
+					float total_time_display = amp_env->attack_time + amp_env->decay_time + amp_env->release_time;
+					total_time_display += total_time_display * (1.f / 3.f);
+
+					const float time_display = (total_time_display / 149.f) * idx;
+
+					return calculate_amp_envelope(*amp_env,
+												  time_display >= total_time_display - amp_env->release_time
+													  ? time_display - (total_time_display - amp_env->release_time)
+													  : time_display,
+												  time_display >= total_time_display - amp_env->release_time);
+				},
+				&envelope, 150, 0, "", 0.f, 1.f, {150, 50});
+
+			ysbp_ui_set_next_item_width(drag_widths);
+			ysbp_ui_float_drag("##amp_s", &envelope.sustain_volume, 0.01f, 0.f, 1.f, "%.2fx");
+			ysbp_ui_same_line();
+			ysbp_ui_set_next_item_width(drag_widths);
+			ysbp_ui_float_drag("##amp_r", &envelope.release_time, 0.05f, 0.f, 10.f, "%.2fs");
+		}
+
 		inline void scale_float_array(float *arr, const uint32_t n, const float factor) {
 			if (factor == 1.f) return;
 			for (uint32_t i = 0; i < n; ++i) arr[i] *= factor;
@@ -187,7 +229,7 @@ namespace YourSound {
 
 		template <uint16_t Voices> class PolyphonyController {
 		public:
-			typedef struct _Voice {
+			typedef struct s_Voice {
 				float phase_advance = 0.f;
 				float phase = 0.f;
 				float velocity = 1.f;
@@ -263,6 +305,99 @@ namespace YourSound {
 			uint32_t m_sample_rate = 0;
 
 			bool m_sustaining = false;
+		};
+
+		class MonophonyController {
+		public:
+			typedef struct {
+				float note_time;
+				float velocity;
+				float frequency;
+			} state_t;
+
+			void reset() {
+				m_play_note = 255;
+				m_sustaining = false;
+				m_notes_on.clear();
+			}
+
+			void note_on(const uint8_t midi_note_number, const float velocity) {
+				if (m_play_note == 255) {
+					m_glide_note = midi_note_number;
+					m_glide_velocity = velocity;
+				} else {
+					m_glide_note = m_play_note;
+					m_glide_velocity = m_velocity;
+				}
+
+				m_notes_on.push_back(midi_note_number);
+				m_play_note = midi_note_number;
+				m_velocity = velocity;
+				m_note_time = 0.f;
+			}
+
+			void note_off(const uint8_t midi_note_number) {
+				for (auto it = m_notes_on.begin(); it != m_notes_on.end(); ++it) {
+					if (*it == midi_note_number) {
+						it = m_notes_on.erase(it);
+						if (midi_note_number != m_play_note) break;
+
+						if (m_sustaining) {
+							m_cur_note_held_by_sustain = true;
+							break;
+						}
+
+						if (it == m_notes_on.begin()) {
+							m_play_note = 255;
+							m_glide_note = 255;
+							break;
+						}
+
+						--it;
+
+						m_glide_note = midi_note_number;
+						m_glide_velocity = m_velocity;
+						m_play_note = *it;
+						m_note_time = 0.f;
+						break;
+					}
+				}
+			}
+
+			void sustain_on() { m_sustaining = true; }
+			void sustain_off() {
+				m_sustaining = false;
+
+				if (!m_cur_note_held_by_sustain) return;
+				m_cur_note_held_by_sustain = false;
+				m_play_note = 255;
+			}
+
+			state_t get_state(const float time_advance) {
+				if (m_play_note == 255) return {0.f, 0.f, 0.f};
+				m_note_time += time_advance;
+
+				const float lerp_factor = std::clamp(m_note_time / glide_seconds, 0.f, 1.f);
+
+				return {m_note_time, std::lerp(m_glide_velocity, m_velocity, lerp_factor),
+						std::lerp(midi_to_freq(m_glide_note, pitch_bend, tuning),
+								  midi_to_freq(m_play_note, pitch_bend, tuning), lerp_factor)};
+			}
+
+			float glide_seconds = 0.f;
+			float tuning = 0.f;
+			float pitch_bend = 0.f;
+		private:
+			std::vector<uint8_t> m_notes_on;
+
+			float m_note_time = 0.f;
+			float m_velocity = 0.f;
+			float m_glide_velocity = 0.f;
+			uint8_t m_play_note = 255;
+			uint8_t m_glide_note = 255;
+
+			bool m_sustaining = false;
+			bool m_cur_note_held_by_sustain = false;
 		};
 	} // namespace BinPlayer
 } // namespace YourSound

@@ -1,9 +1,3 @@
-[submodule "lib/imgui_juce"]
-	path = lib/imgui_juce
-	url = https://github.com/Krasjet/imgui_juce.git
-[submodule "lib/JUCE"]
-	path = lib/JUCE
-	url = https://github.com/juce-framework/JUCE.git
 [submodule "lib/SDL"]
 	path = lib/SDL
 	url = https://github.com/libsdl-org/SDL.git
@@ -39,3 +33,9 @@
 [submodule "lib/rtmidi"]
 	path = lib/rtmidi
 	url = https://github.com/thestk/rtmidi.git
+[submodule "lib/clap"]
+	path = lib/clap
+	url = https://github.com/free-audio/clap.git
+[submodule "lib/clap-helpers"]
+	path = lib/clap-helpers
+	url = https://github.com/free-audio/clap-helpers.git

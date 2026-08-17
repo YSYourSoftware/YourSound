@@ -14,8 +14,8 @@ namespace rt::midi {
 	class RtMidiIn;
 }
 
-namespace YSMKH {
-	class YSMKH_API MIDIMapping {
+namespace YSKMH {
+	class YSKMH_API MIDIMapping {
 	public:
 		typedef std::function<void(const std::string &id, float value)> param_set_callback_t;
 		typedef std::function<float(const std::string &id)> param_get_callback_t;

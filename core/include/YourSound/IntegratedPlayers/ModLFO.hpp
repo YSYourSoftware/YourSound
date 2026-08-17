@@ -18,7 +18,7 @@ namespace YourSound::BinPlayer::Integrated {
 		BasicOscillator osc;
 	};
 
-	class YS_CORE_EXPORT_NO_EXTERN ModLFO : public PlayerWrapper {
+	class YS_API ModLFO : public PlayerWrapper {
 	public:
 		~ModLFO() override;
 
@@ -67,10 +67,9 @@ namespace YourSound::BinPlayer::Integrated {
 		std::vector<LFOInfo> m_lfos;
 
 		float m_time_position = 0.f;
-		uint8_t m_render_chunk_size = 1;
 	};
 
-	inline YS_CORE_EXPORT_NO_EXTERN void register_mod_lfo() {
+	inline YS_API void register_mod_lfo() {
 		g_bp_registry["org.yoursoftware.sound.mod.lfo"] = [] { return new ModLFO(); };
 	}
 } // namespace YourSound::BinPlayer::Integrated

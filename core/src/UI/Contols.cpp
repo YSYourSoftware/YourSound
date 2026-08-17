@@ -5,6 +5,8 @@
 #include <imgui-knobs.h>
 #include <imgui.h>
 
+#include <cmath>
+
 extern "C" {
 void ysbp_ui_begin_group() { ImGui::BeginGroup(); }
 void ysbp_ui_end_group() { ImGui::EndGroup(); }
@@ -43,6 +45,11 @@ bool ysbp_ui_knob(const char *label, float *p_value, const float v_min, const fl
 bool ysbp_ui_float_slider(const char *label, float *v, const float v_min, const float v_max, const char *format,
 						  const ysbp_ui_ImGuiSliderFlags flags) {
 	return ImGui::SliderFloat(label, v, v_min, v_max, format, flags);
+}
+
+bool ysbp_ui_float_slider_vertical(const char *label, const ysbp_ui_Vec2 size, float *v, const float v_min,
+								   const float v_max, const char *format, const ysbp_ui_ImGuiSliderFlags flags) {
+	return ImGui::VSliderFloat(label, {size.x, size.y}, v, v_min, v_max, format, flags);
 }
 
 bool ysbp_ui_float_drag(const char *label, float *v, const float v_speed, const float v_min, const float v_max,
@@ -112,6 +119,14 @@ void ysbp_ui_line_graph(const char *label, float (*values_getter)(void *data, in
 }
 
 void ysbp_ui_set_next_item_width(const float width) { ImGui::SetNextItemWidth(width); }
+
+ysbp_ui_Vec2 ysbp_ui_get_item_spacing() {
+	const ImVec2 &item_spacing = ImGui::GetStyle().ItemSpacing;
+	return {item_spacing.x, item_spacing.y};
+}
+
+float ysbp_ui_get_frame_height() { return ImGui::GetFrameHeight(); }
+void ysbp_ui_spacing() { ImGui::Spacing(); }
 }
 
 namespace YourSound::UI {

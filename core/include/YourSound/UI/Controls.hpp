@@ -1,6 +1,8 @@
 #pragma once
 
-#include "YourSound/BinPlayerInterface.hpp"
+#include "YourSound/CoreExportImport.hpp"
+
+#include <cstdint>
 
 typedef int ysbp_ui_ImGuiKnobFlags;
 
@@ -257,64 +259,72 @@ typedef struct ysbp_ui_Vec4 {
 	float x, y, z, w;
 } ysbp_ui_Vec4;
 
-YS_CORE_EXPORT void ysbp_ui_begin_group();
-YS_CORE_EXPORT void ysbp_ui_end_group();
+YS_BPI void ysbp_ui_begin_group();
+YS_BPI void ysbp_ui_end_group();
 
-YS_CORE_EXPORT void ysbp_ui_begin_child(const char *str_id, ysbp_ui_Vec2 size = {0, 0},
+YS_BPI void ysbp_ui_begin_child(const char *str_id, ysbp_ui_Vec2 size = {0, 0},
 										ysbp_ui_ImGuiChildFlags child_flags = 0,
 										ysbp_ui_ImGuiWindowFlags window_flags = 0);
-YS_CORE_EXPORT void ysbp_ui_end_child();
+YS_BPI void ysbp_ui_end_child();
 
-YS_CORE_EXPORT void ysbp_ui_same_line();
-YS_CORE_EXPORT ysbp_ui_Vec2 ysbp_ui_get_item_rect_size();
-YS_CORE_EXPORT ysbp_ui_Vec2 ysbp_ui_get_content_region_avail();
+YS_BPI void ysbp_ui_same_line();
+YS_BPI ysbp_ui_Vec2 ysbp_ui_get_item_rect_size();
+YS_BPI ysbp_ui_Vec2 ysbp_ui_get_content_region_avail();
 
-YS_CORE_EXPORT void ysbp_ui_align_cursor_for_center(float width);
-YS_CORE_EXPORT bool ysbp_ui_is_hovering();
+YS_BPI void ysbp_ui_align_cursor_for_center(float width);
+YS_BPI bool ysbp_ui_is_hovering();
 
-YS_CORE_EXPORT void ysbp_ui_text(const char *string);
-YS_CORE_EXPORT bool ysbp_ui_button(const char *label, ysbp_ui_Vec2 size = {0, 0});
+YS_BPI void ysbp_ui_text(const char *string);
+YS_BPI bool ysbp_ui_button(const char *label, ysbp_ui_Vec2 size = {0, 0});
 
-YS_CORE_EXPORT bool ysbp_ui_checkbox(const char *label, bool *value);
-YS_CORE_EXPORT bool ysbp_ui_knob(const char *label, float *p_value, float v_min, float v_max, float speed = 0,
+YS_BPI bool ysbp_ui_checkbox(const char *label, bool *value);
+YS_BPI bool ysbp_ui_knob(const char *label, float *p_value, float v_min, float v_max, float speed = 0,
 								 const char *format = "%.3f",
 								 ysbp_ui_ImGuiKnobVariant variant = ysbp_ui_ImGuiKnobVariant_Tick, float size = 0,
 								 ysbp_ui_ImGuiKnobFlags flags = 0, int steps = 10, float angle_min = -1,
 								 float angle_max = -1);
-YS_CORE_EXPORT bool ysbp_ui_float_slider(const char *label, float *v, float v_min, float v_max,
+YS_BPI bool ysbp_ui_float_slider(const char *label, float *v, float v_min, float v_max,
 										 const char *format = "%.3f", ysbp_ui_ImGuiSliderFlags flags = 0);
-YS_CORE_EXPORT bool ysbp_ui_float_drag(const char *label, float *v, float v_speed, float v_min, float v_max,
+YS_BPI bool ysbp_ui_float_slider_vertical(const char *label, ysbp_ui_Vec2 size, float *v, float v_min,
+												  float v_max, const char *format = "%.3f",
+												  ysbp_ui_ImGuiSliderFlags flags = 0);
+YS_BPI bool ysbp_ui_float_drag(const char *label, float *v, float v_speed, float v_min, float v_max,
 									   const char *format = "%.3f", ysbp_ui_ImGuiSliderFlags flags = 0);
-YS_CORE_EXPORT bool ysbp_ui_int_slider(const char *label, int *v, int v_min, int v_max, const char *format = "%d",
+YS_BPI bool ysbp_ui_int_slider(const char *label, int *v, int v_min, int v_max, const char *format = "%d",
 									   ysbp_ui_ImGuiSliderFlags flags = 0);
-YS_CORE_EXPORT bool ysbp_ui_int_drag(const char *label, int *v, int v_speed, int v_min, int v_max,
+YS_BPI bool ysbp_ui_int_drag(const char *label, int *v, int v_speed, int v_min, int v_max,
 									 const char *format = "%d", ysbp_ui_ImGuiSliderFlags flags = 0);
 
-YS_CORE_EXPORT bool ysbp_ui_begin_combo(const char *label, const char *preview_value,
+YS_BPI bool ysbp_ui_begin_combo(const char *label, const char *preview_value,
 										ysbp_ui_ImGuiComboFlags flags = 0);
-YS_CORE_EXPORT bool ysbp_ui_combo_selectable(const char *label, bool selected, ysbp_ui_ImGuiSelectableFlags flags = 0);
-YS_CORE_EXPORT void ysbp_ui_combo_set_default_item_focus();
-YS_CORE_EXPORT void ysbp_ui_end_combo();
-YS_CORE_EXPORT bool ysbp_ui_begin_tooltip();
-YS_CORE_EXPORT void ysbp_ui_end_tooltip();
+YS_BPI bool ysbp_ui_combo_selectable(const char *label, bool selected, ysbp_ui_ImGuiSelectableFlags flags = 0);
+YS_BPI void ysbp_ui_combo_set_default_item_focus();
+YS_BPI void ysbp_ui_end_combo();
+YS_BPI bool ysbp_ui_begin_tooltip();
+YS_BPI void ysbp_ui_end_tooltip();
 
-YS_CORE_EXPORT void ysbp_ui_push_style_colour(ysbp_ui_ImGuiCol idx, ysbp_ui_Vec4 col);
-YS_CORE_EXPORT void ysbp_ui_pop_style_colour(int count = 1);
-YS_CORE_EXPORT void ysbp_ui_push_style_var(ysbp_ui_ImGuiStyleVar idx, ysbp_ui_Vec2 val);
-YS_CORE_EXPORT void ysbp_ui_pop_style_var(int count = 1);
-YS_CORE_EXPORT void ysbp_ui_push_font(ysbp_ui_Font font);
-YS_CORE_EXPORT void ysbp_ui_pop_font();
+YS_BPI void ysbp_ui_push_style_colour(ysbp_ui_ImGuiCol idx, ysbp_ui_Vec4 col);
+YS_BPI void ysbp_ui_pop_style_colour(int count = 1);
+YS_BPI void ysbp_ui_push_style_var(ysbp_ui_ImGuiStyleVar idx, ysbp_ui_Vec2 val);
+YS_BPI void ysbp_ui_pop_style_var(int count = 1);
+YS_BPI void ysbp_ui_push_font(ysbp_ui_Font font);
+YS_BPI void ysbp_ui_pop_font();
 
-YS_CORE_EXPORT void ysbp_ui_line_graph_data(const char *label, const float *values, int values_count, int values_offset,
+YS_BPI void ysbp_ui_line_graph_data(const char *label, const float *values, int values_count, int values_offset,
 											const char *overlay_text, float scale_min, float scale_max,
 											ysbp_ui_Vec2 graph_size, int stride);
 
-YS_CORE_EXPORT void ysbp_ui_line_graph(const char *label, float (*values_getter)(void *data, int idx), void *data,
+YS_BPI void ysbp_ui_line_graph(const char *label, float (*values_getter)(void *data, int idx), void *data,
 									   int values_count, int values_offset, const char *overlay_text, float scale_min,
 									   float scale_max, ysbp_ui_Vec2 graph_size);
 
-YS_CORE_EXPORT void ysbp_ui_set_next_item_width(float width);
+YS_BPI void ysbp_ui_set_next_item_width(float width);
+
+YS_BPI ysbp_ui_Vec2 ysbp_ui_get_item_spacing();
+YS_BPI float ysbp_ui_get_frame_height();
+
+YS_BPI void ysbp_ui_spacing();
 
 namespace YourSound::UI {
-	YS_CORE_EXPORT_NO_EXTERN void set_imgui_context(void *im_context);
+	YS_API void set_imgui_context(void *im_context);
 }

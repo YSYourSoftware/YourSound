@@ -11,7 +11,7 @@ else()
 	message(FATAL_ERROR "PkgConfig::LuaJIT does not exist")
 endif()
 
-set_target_properties(YSKeyboardMappingHandler PROPERTIES OUTPUT_NAME "YSMKH")
+set_target_properties(YSKeyboardMappingHandler PROPERTIES OUTPUT_NAME "YSKMH")
 target_link_libraries(YSKeyboardMappingHandler PRIVATE
 	rtmidi
 	nlohmann_json
@@ -28,5 +28,5 @@ target_sources(YSKeyboardMappingHandler PRIVATE
 )
 
 if(WIN32)
-	target_sources(YSKeyboardMappingHandler PRIVATE ../shared.rc)
+	add_target_resource(YSKeyboardMappingHandler "YourSound Keyboard Mapping Handler" "Required to use MIDI keyboards with YourSound applications.")
 endif()

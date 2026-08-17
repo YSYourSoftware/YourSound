@@ -13,7 +13,7 @@ target_include_directories(YourSound PUBLIC
 )
 
 if(WIN32)
-	target_sources(YourSound PRIVATE ../shared.rc)
+	add_target_resource(YourSound "YourSound Core" "Required for all YourSound applications.")
 endif()
 
 find_package(PkgConfig REQUIRED)

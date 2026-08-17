@@ -2,21 +2,21 @@
 
 #ifdef YS_IN_CORE_BUILD
 #ifdef _WIN32
-#define YS_CORE_EXPORT extern "C" __declspec(dllexport)
-#define YS_CORE_EXPORT_NO_EXTERN __declspec(dllexport)
+#define YS_BPI extern "C" __declspec(dllexport)
+#define YS_API __declspec(dllexport)
 #elifdef __GNUC__
-#define YS_CORE_EXPORT extern "C" __attribute__((visibility("default")))
-#define YS_CORE_EXPORT_NO_EXTERN __attribute__((visibility("default")))
+#define YS_BPI extern "C" __attribute__((visibility("default")))
+#define YS_API __attribute__((visibility("default")))
 #else
-#define YS_CORE_EXPORT extern "C"
-#define YS_CORE_EXPORT_NO_EXTERN
+#define YS_BPI extern "C"
+#define YS_API
 #endif
 #else
 #ifdef _WIN32
-#define YS_CORE_EXPORT extern "C" __declspec(dllimport)
-#define YS_CORE_EXPORT_NO_EXTERN __declspec(dllimport)
+#define YS_BPI extern "C" __declspec(dllimport)
+#define YS_API __declspec(dllimport)
 #else
-#define YS_CORE_EXPORT extern "C"
-#define YS_CORE_EXPORT_NO_EXTERN
+#define YS_BPI extern "C"
+#define YS_API
 #endif
 #endif

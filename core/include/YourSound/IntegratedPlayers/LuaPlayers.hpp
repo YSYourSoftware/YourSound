@@ -11,7 +11,7 @@
 class TextEditor;
 
 namespace YourSound::BinPlayer::Integrated {
-	class YS_CORE_EXPORT_NO_EXTERN BinPlayerLua : public virtual Player {
+	class YS_API BinPlayerLua : public virtual Player {
 	public:
 		BinPlayerLua();
 		~BinPlayerLua() override;
@@ -94,7 +94,7 @@ namespace YourSound::BinPlayer::Integrated {
 		uint32_t m_exception_line = 0;
 	};
 
-	/*class YS_CORE_EXPORT_NO_EXTERN BinPlayerLuaWrapper : public PlayerWrapper, public BinPlayerLua {
+	/*class YS_API BinPlayerLuaWrapper : public PlayerWrapper, public BinPlayerLua {
 	public:
 		BinPlayerLuaWrapper();
 
@@ -125,7 +125,7 @@ namespace YourSound::BinPlayer::Integrated {
 		Player *m_player = nullptr;
 	};*/
 
-	inline YS_CORE_EXPORT_NO_EXTERN void register_lua_players() {
+	inline YS_API void register_lua_players() {
 		g_bp_registry["org.yoursoftware.sound.lua"] = [] { return new BinPlayerLua(); };
 		/* g_bp_registry["org.yoursoftware.sound.lua-wrapper"] = [] {
 			return static_cast<Player *>(new BinPlayerLuaWrapper());

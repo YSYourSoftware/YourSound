@@ -1,6 +1,7 @@
 build/
 build-release/
 build-debug/
+build-plugin-release/
 */build/
 installer/win/temp/
 

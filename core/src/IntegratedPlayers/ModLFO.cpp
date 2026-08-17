@@ -40,21 +40,12 @@ void ModLFO::note_on(const uint8_t midi_note_number, const float velocity) {
 void ModLFO::note_off(const uint8_t midi_note_number) { m_player->note_off(midi_note_number); }
 
 void ModLFO::render(float *output_buffer, const uint16_t number_samples) {
-	const float sample_second = 1.f / m_sample_rate;
+	m_time_position += static_cast<float>(number_samples) / m_sample_rate;
+	m_time_position = m_time_position - std::floorf(m_time_position);
 
-	for (uint16_t i = 0; i < number_samples; i++) {
-		m_time_position += sample_second;
-		m_time_position = m_time_position - std::floorf(m_time_position);
+	p_apply_lfos();
 
-		p_apply_lfos();
-
-		/*uint8_t chunk_size = m_render_chunk_size;
-		if (number_samples - i > chunk_size) chunk_size = number_samples - i;*/
-
-		m_player->render(output_buffer + (i * 2), 1 /*chunk_size*/);
-
-		// i += chunk_size - 1;
-	}
+	m_player->render(output_buffer, number_samples);
 }
 
 uint64_t ModLFO::store_calc_size(const bool store_reference) {
@@ -74,7 +65,7 @@ uint64_t ModLFO::store_calc_size(const bool store_reference) {
 void ModLFO::store(uint8_t *output_buffer, bool store_reference) {
 	uint16_t offset = 0;
 
-	output_buffer[offset++] = m_render_chunk_size;
+	++offset;
 	output_buffer[offset++] = m_lfos.size();
 
 	for (const LFOInfo &lfo : m_lfos) {
@@ -101,7 +92,7 @@ void ModLFO::store(uint8_t *output_buffer, bool store_reference) {
 void ModLFO::load(const uint8_t *input_buffer) {
 	uint16_t offset = 0;
 
-	m_render_chunk_size = input_buffer[offset++];
+	++offset;
 	const uint8_t lfo_count = input_buffer[offset++];
 	m_lfos.reserve(lfo_count);
 
@@ -160,18 +151,6 @@ void ModLFO::render_graphics() {
 
 	ImGui::PopStyleColor(3);
 	ImGui::PopFont();
-
-	ImGui::SameLine();
-
-	ImGui::SetNextItemWidth(26.f);
-	ImGui::DragInt("Render Chunk Size", reinterpret_cast<int *>(&m_render_chunk_size), 1, 1, 64, "%d",
-				   ImGuiSliderFlags_ClampOnInput);
-	if (ImGui::IsItemHovered()) {
-		ImGui::BeginTooltip();
-		ImGui::Text("LFO parameters are applied when audio is rendered.\nTo achieve this, audio is rendered in smaller "
-					"chunks.\nLower = Smoother LFO\nHigher = Faster Rendering");
-		ImGui::EndTooltip();
-	}
 
 	ImGui::BeginChild("##lfos", ImVec2(ImGui::GetContentRegionAvail().x, 220.f), 0,
 					  ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_HorizontalScrollbar |

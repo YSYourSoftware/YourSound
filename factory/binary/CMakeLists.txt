@@ -12,5 +12,5 @@ target_sources(binplayers PUBLIC
 )
 
 if(WIN32)
-	target_sources(binplayers PRIVATE ../../shared.rc)
+	add_target_resource(binplayers "YourSound Factory Library Binary Players" "Binary players for the YSFL.")
 endif()

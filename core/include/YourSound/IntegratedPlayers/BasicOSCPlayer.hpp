@@ -5,7 +5,7 @@
 #include "YourSound/Player.hpp"
 
 namespace YourSound::BinPlayer::Integrated {
-	class YS_CORE_EXPORT_NO_EXTERN BasicOSCPlayer : public Player {
+	class YS_API BasicOSCPlayer : public Player {
 		public:
 			void note_on(const uint8_t midi_note_number, const float velocity) override {m_note_midi = midi_note_number; m_note_velocity = velocity;}
 			void note_off(const uint8_t midi_note_number) override {m_note_midi = 0;}
@@ -41,7 +41,7 @@ namespace YourSound::BinPlayer::Integrated {
 			float m_pitch_bend = 0.f;
 	};
 
-	inline YS_CORE_EXPORT_NO_EXTERN void register_basic_osc_player() {
+	inline YS_API void register_basic_osc_player() {
 		g_bp_registry["org.yoursoftware.sound.basic-osc"] = [] {
 			return new BasicOSCPlayer();
 		};

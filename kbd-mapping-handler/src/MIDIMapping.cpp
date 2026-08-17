@@ -3,7 +3,7 @@
 #include <RtMidi.h>
 #include <nlohmann/json.hpp>
 
-using namespace YSMKH;
+using namespace YSKMH;
 
 MIDIMapping::MIDIMapping(const std::string &json_string, const std::filesystem::path &script_folder,
 						 const param_set_callback_t &param_set_callback, const param_get_callback_t &param_get_callback,

@@ -1,6 +1,6 @@
 if(YS_BUILD_PLUGIN)
-	add_subdirectory(JUCE)
-	add_subdirectory(imgui_juce)
+	add_subdirectory(clap)
+	add_subdirectory(clap-helpers)
 endif()
 
 set(RTMIDI_BUILD_STATIC_LIBS ON)

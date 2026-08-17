@@ -1,5 +1,6 @@
 #pragma once
 
+#include <YourSound/BinPlayerSTD.hpp>
 #include <YourSound/Player.hpp>
 
 struct HexWave;
@@ -32,24 +33,24 @@ public:
 
 	const char *get_id() override { return "org.yoursoftware.sound.hexwave"; }
 private:
-	uint8_t m_note_on = 0;
-	float m_note_velocity = 0.f;
+	YourSound::BinPlayer::MonophonyController m_monophony_controller;
+	YourSound::BinPlayer::amp_envelope_t m_amp_envelope;
+	YourSound::BinPlayer::filter_envelope_t m_filter_envelope;
+
+	HexWave *m_hexwave = nullptr;
+	float *m_hexwave_user_buffer = nullptr;
 
 	uint32_t m_sample_rate = 0;
 
-	float m_pitch_bend = 0.f;
-
 	float m_top_row_width = 0.f;
 	float m_knob_row_width = 0.f;
+	float m_envelope_row_width = 0.f;
+	float m_envelope_row_height = 0.f;
 
-	bool m_reflect = true;
 	float m_peak_time = 0.f;
 	float m_half_height = 1.f;
 	float m_zero_wait = 0.f;
-
-	float *m_hexwave_user_buffer = nullptr;
-
-	HexWave *m_hexwave = nullptr;
+	bool m_reflect = true;
 
 	void p_update_params() const;
 };

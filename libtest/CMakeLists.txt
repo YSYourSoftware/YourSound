@@ -21,7 +21,8 @@ target_link_libraries(YSLibTest PRIVATE
 )
 
 if(WIN32)
-	target_sources(YSLibTest PRIVATE ../shared.rc app.rc)
+	target_sources(YSLibTest PRIVATE app.rc)
+	add_target_resource(YSLibTest "YourSound Library Tester" "Test YourSound binary players.")
 endif()
 
 add_dependencies(YSLibTest YourSound YSKeyboardMappingHandler)
