@@ -16,8 +16,12 @@ project(YourSound
 	LANGUAGES CXX
 )
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 if(MSVC)
-	add_compile_options($<$<CONFIG:Debug>:/fsanitize=address>)
+	add_compile_options($<$<CONFIG:Debug>:/fsanitize=address> /permissive- /volatile:iso /Zc:preprocessor /EHsc /Zc:__cplusplus /Zc:externConstexpr /Zc:throwingNew)
 elseif(GCC OR CLANG)
 	add_compile_options($<$<CONFIG:Debug>:-fsanitize=address>)
 	add_link_options($<$<CONFIG:Debug>:-fsanitize=address>)
@@ -28,6 +32,9 @@ set(YS_PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 function(add_target_resource TARGET_NAME PRODUCT_NAME FILE_DESCRIPTION)
 	set(RC_PRODUCT_NAME "${PRODUCT_NAME}")
 	set(RC_FILE_DESCRIPTION "${FILE_DESCRIPTION}")
+	set(RC_VER_MAJ "${CMAKE_PROJECT_VERSION_MAJOR}")
+	set(RC_VER_MIN "${CMAKE_PROJECT_VERSION_MINOR}")
+	set(RC_VER_PAT "${CMAKE_PROJECT_VERSION_PATCH}")
 
 	set(OUTPUT_RC "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_NAME}_shared.rc")
 

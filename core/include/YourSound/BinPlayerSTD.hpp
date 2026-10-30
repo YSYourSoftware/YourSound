@@ -91,7 +91,7 @@
 		delete static_cast<YourSound::Player *>(player);                                                               \
 	}                                                                                                                  \
                                                                                                                        \
-	YS_EXTERN_EXPORT uint32_t get_api_version() { return YS_API_VERSION; }                                             \
+	YS_EXTERN_EXPORT uint32_t get_api_version() { return YS_BPI_VERSION; }                                             \
 	YS_BP_REG_BUILD_INFO                                                                                               \
 	YS_EXTERN_EXPORT inline const char *get_yoursound_version() { return YS_VERSION_STRING; }                          \
 	YS_EXTERN_EXPORT YS_PlayerHandle create_bin_player(const char *id) {                                               \
@@ -123,6 +123,16 @@ namespace YourSound {
 
 		return result;
 	}
+
+	template <typename T> class AutoFreePTR {
+	public:
+		explicit AutoFreePTR(T *ptr) : m_ptr(ptr) {}
+		~AutoFreePTR() { delete m_ptr; }
+
+		T *ptr() { return m_ptr; }
+	private:
+		T *m_ptr;
+	};
 
 	namespace BinPlayer {
 		enum BasicOscillator : uint8_t { SQUARE = 0, TRIANGLE = 1, SINE = 2, SAWTOOTH = 3, NOISE = 4 };
@@ -238,7 +248,7 @@ namespace YourSound {
 				uint8_t midi_note_number = 0;
 
 				bool hanging_by_sustain = false;
-				bool decaying = false;
+				bool releasing = false;
 			} voice_t;
 
 			typedef std::vector<voice_t>::iterator voice_iterator_t;
@@ -246,18 +256,16 @@ namespace YourSound {
 
 			PolyphonyController() { m_voices.reserve(Voices); }
 
-			void set_sample_rate(const uint32_t sample_rate) { m_sample_rate = sample_rate; }
-
 			void note_on(const uint8_t midi_note_number, const float velocity) {
 				if (m_voices.size() >= Voices) { m_voices.erase(m_voices.begin()); }
 
-				m_voices.emplace_back(midi_to_freq(midi_note_number, m_pitch_bend) / m_sample_rate, 0.f, velocity, 0.f,
+				m_voices.emplace_back(midi_to_freq(midi_note_number, m_pitch_bend) / sample_rate, 0.f, velocity, 0.f,
 									  midi_note_number, false, false);
 			}
 
 			void note_off(const uint8_t midi_note_number) {
 				auto it = std::find_if(m_voices.begin(), m_voices.end(), [midi_note_number](const voice_t &v) {
-					return v.midi_note_number == midi_note_number && !v.decaying && !v.hanging_by_sustain;
+					return v.midi_note_number == midi_note_number && !v.releasing && !v.hanging_by_sustain;
 				});
 
 				if (it != m_voices.end()) {
@@ -266,19 +274,17 @@ namespace YourSound {
 						return;
 					}
 
-					it->decaying = true;
+					it->releasing = true;
 					it->time = 0.f;
 				}
 			}
-
-			void voice_delete(const voice_const_iterator_t &it) { m_voices.erase(it); }
 
 			void sustain_on() { m_sustaining = true; }
 			void sustain_off() {
 				m_sustaining = false;
 				for (auto &voice : m_voices) {
 					if (!voice.hanging_by_sustain) continue;
-					voice.decaying = true;
+					voice.releasing = true;
 					voice.time = 0.f;
 				}
 			}
@@ -286,11 +292,14 @@ namespace YourSound {
 			void pitch_bend_update(const float pitch_bend) {
 				m_pitch_bend = pitch_bend;
 				for (auto &voice : m_voices)
-					voice.phase_advance = midi_to_freq(voice.midi_note_number, m_pitch_bend) / m_sample_rate;
+					voice.phase_advance = midi_to_freq(voice.midi_note_number, m_pitch_bend) / sample_rate;
 			}
 
-			void for_each_voice(std::function<void(const voice_iterator_t &)> function) {
-				for (voice_iterator_t it = m_voices.begin(); it <= m_voices.end(); ++it) function(it);
+			void for_each_voice(std::function<bool(const voice_iterator_t &)> function) {
+				for (voice_iterator_t it = m_voices.begin(); it < m_voices.end();) {
+					if (function(it)) ++it;
+					else it = m_voices.erase(it);
+				}
 			}
 
 			void reset() {
@@ -298,11 +307,12 @@ namespace YourSound {
 				m_pitch_bend = 0.f;
 				m_sustaining = false;
 			}
+
+			uint32_t sample_rate = 0;
 		private:
 			std::vector<voice_t> m_voices;
 
 			float m_pitch_bend = 0.f;
-			uint32_t m_sample_rate = 0;
 
 			bool m_sustaining = false;
 		};
@@ -398,6 +408,157 @@ namespace YourSound {
 
 			bool m_sustaining = false;
 			bool m_cur_note_held_by_sustain = false;
+		};
+
+		class SampleLoader {
+		public:
+			typedef struct s_Sample final {
+			public:
+				enum SampleFormat : uint8_t {
+					SAMP_UNINIT = 255,
+
+					SAMP_UINT8 = 0,
+					SAMP_INT16 = 1,
+					SAMP_INT32 = 2,
+					SAMP_FLOAT = 3,
+					SAMP_DOUBLE = 4
+				};
+
+				typedef std::function<void(std::vector<uint8_t> &sample_data, SampleFormat format, bool stereo,
+										   uint32_t in_rate, uint32_t out_rate)>
+					resample_func_t;
+
+				explicit s_Sample(const bool stereo) : stereo(stereo) {}
+
+				template <typename T> const T *pcm() const { return static_cast<const T *>(m_data.data()); }
+				void resample(const SampleFormat sample_format, const uint32_t sample_rate,
+							  const resample_func_t &resample_func) {
+					if (sample_format != m_sample_format) {
+						const size_t sample_count = m_data.size() / sample_format_sizes[m_sample_format];
+						if (sample_format_sizes[m_sample_format] >= sample_format_sizes[sample_format]) {
+							uint8_t *write_cursor = m_data.data();
+							for (size_t i = 0; i < sample_count; i++) {
+								const std::vector<uint8_t> reinterped_val =
+									p_reinterp(m_data.data() + i, m_sample_format, sample_format);
+
+								for (const auto byte : reinterped_val) *(write_cursor++) = byte;
+							}
+
+							m_data.resize(sample_count * sample_format_sizes[sample_format]);
+						} else {
+							std::vector<uint8_t> new_data_buf;
+							new_data_buf.resize(sample_count * sample_format_sizes[sample_format]);
+							m_data.resize(sample_count * sample_format_sizes[sample_format]);
+
+							for (size_t i = 0; i < sample_count; i++) {
+								const std::vector<uint8_t> reinterped_val =
+									p_reinterp(m_data.data() + i, m_sample_format, sample_format);
+								new_data_buf.insert(new_data_buf.end(), reinterped_val.begin(), reinterped_val.end());
+							}
+
+							std::memcpy(m_data.data(), new_data_buf.data(), new_data_buf.size());
+						}
+
+						m_sample_format = sample_format;
+
+						if (sample_rate == m_sample_rate) return;
+						resample_func(m_data, m_sample_format, stereo, m_sample_rate, sample_rate);
+					}
+				}
+
+				static constexpr uint8_t sample_format_sizes[] = {1, 2, 3, 4, 4, 8};
+
+				const bool stereo;
+			private:
+				template <typename T> double p_normalise(T value) {
+					static_assert(std::is_integral_v<T> && std::is_signed_v<T>);
+
+					constexpr auto min_value = static_cast<double>(std::numeric_limits<T>::min());
+					constexpr auto max_value = static_cast<double>(std::numeric_limits<T>::max());
+
+					const auto x = static_cast<double>(value);
+
+					return x < 0.0 ? x / -min_value : x / max_value;
+				}
+
+				std::vector<uint8_t> p_reinterp(const uint8_t *original, const SampleFormat original_format,
+												const SampleFormat target_format) {
+					double original_pcm;
+					switch (original_format) {
+					case SAMP_UINT8:
+						original_pcm =
+							static_cast<double>(original[0]) / static_cast<double>(std::numeric_limits<uint8_t>::max());
+						break;
+					case SAMP_INT16: original_pcm = p_normalise(*reinterpret_cast<const int16_t *>(original)); break;
+					case SAMP_INT32: original_pcm = p_normalise(*reinterpret_cast<const int32_t *>(original)); break;
+					case SAMP_FLOAT:
+						original_pcm = static_cast<double>(*reinterpret_cast<const float *>(original));
+						break;
+					case SAMP_DOUBLE: original_pcm = *reinterpret_cast<const double *>(original); break;
+					default: throw std::invalid_argument("Unrecognised original_format");
+					}
+
+					switch (target_format) {
+					case SAMP_UINT8:
+						return {static_cast<uint8_t>(
+							std::round(original_pcm / static_cast<double>(std::numeric_limits<uint8_t>::max())))};
+					case SAMP_INT16: {
+						const auto value = static_cast<int16_t>(
+							std::round(original_pcm < 0.0
+										   ? original_pcm / -static_cast<double>(std::numeric_limits<int16_t>::min())
+										   : original_pcm / static_cast<double>(std::numeric_limits<int16_t>::max())));
+						return {static_cast<uint8_t>(static_cast<uint16_t>(value) & 255),
+								static_cast<uint8_t>((static_cast<uint16_t>(value) >> 8) & 255)};
+					}
+					case SAMP_INT32: {
+						const auto value = static_cast<int32_t>(
+							std::round(original_pcm < 0.0
+										   ? original_pcm / -static_cast<double>(std::numeric_limits<int32_t>::min())
+										   : original_pcm / static_cast<double>(std::numeric_limits<int32_t>::max())));
+						return {static_cast<uint8_t>(static_cast<uint32_t>(value) & 255),
+								static_cast<uint8_t>((static_cast<uint32_t>(value) >> 8) & 255),
+								static_cast<uint8_t>((static_cast<uint32_t>(value) >> 16) & 255),
+								static_cast<uint8_t>((static_cast<uint32_t>(value) >> 24) & 255)};
+					}
+					case SAMP_FLOAT: {
+						const auto value_f = static_cast<float>(original_pcm);
+						const uint32_t value = *reinterpret_cast<const uint32_t *>(&value_f);
+						return {static_cast<uint8_t>(value & 255), static_cast<uint8_t>((value >> 8) & 255),
+								static_cast<uint8_t>((value >> 16) & 255), static_cast<uint8_t>((value >> 24) & 255)};
+					}
+					case SAMP_DOUBLE: {
+						const uint64_t value = *reinterpret_cast<const uint64_t *>(&original_pcm);
+						return {static_cast<uint8_t>(value & 255),		   static_cast<uint8_t>((value >> 8) & 255),
+								static_cast<uint8_t>((value >> 16) & 255), static_cast<uint8_t>((value >> 24) & 255),
+								static_cast<uint8_t>((value >> 32) & 255), static_cast<uint8_t>((value >> 40) & 255),
+								static_cast<uint8_t>((value >> 48) & 255), static_cast<uint8_t>((value >> 56) & 255)};
+					}
+					default: throw std::invalid_argument("Unrecognised target_format");
+					}
+				}
+
+				// must be in LE for easy interpretation
+				std::vector<uint8_t> m_data;
+				uint32_t m_sample_rate = 0;
+				SampleFormat m_sample_format = SAMP_UNINIT;
+			public:
+				friend class SampleLoader;
+			} sample_t;
+
+			void set_sample_format(const sample_t::SampleFormat format) {
+				for (auto &sample : m_samples) {
+					sample.resample(format, m_sample_rate,
+									[](std::vector<uint8_t> &sample_data, sample_t::SampleFormat t_format, bool stereo,
+									   uint32_t in_rate, uint32_t out_rate) {});
+				}
+			}
+
+			void insert_samples() {}
+		private:
+			std::vector<sample_t> m_samples;
+
+			uint32_t m_sample_rate = 0;
+			sample_t::SampleFormat m_sample_format = sample_t::SAMP_UNINIT;
 		};
 	} // namespace BinPlayer
 } // namespace YourSound

@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <functional>
 #include <unordered_map>
-#include <vector>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -14,7 +13,6 @@
 #include <Windows.h>
 #endif
 
-#define YS_LOAD_API_FN(api, name) api.name = p_get_dll_func<decltype(api.name)>("player_" #name)
 #define YS_ADD_RUNTIME_ERROR(name)                                                                                     \
 	class name : public std::runtime_error {                                                                           \
 	public:                                                                                                            \
@@ -22,9 +20,11 @@
 		explicit name(const char *message) : std::runtime_error(message) {}                                            \
 	}
 
+extern "C" {
 typedef void *YS_ResourceHandle;
 typedef void *YS_PlayerHandle;
 typedef void *YS_PlayerWrapperHandle;
+}
 
 namespace YourSound {
 	YS_ADD_RUNTIME_ERROR(invalid_binary_player);
@@ -33,54 +33,6 @@ namespace YourSound {
 #ifdef _WIN32
 	inline std::unordered_map<std::filesystem::path, HMODULE> loaded_dlls;
 #endif
-
-	struct PlayerAPI {
-		using note_on_t = void (*)(YS_PlayerHandle, uint8_t, float);
-		using note_off_t = void (*)(YS_PlayerHandle, uint8_t);
-
-		using render_t = void (*)(YS_PlayerHandle, float *, uint16_t);
-
-		using store_calc_size_t = uint64_t (*)(YS_PlayerHandle, bool);
-		using store_t = void (*)(YS_PlayerHandle, uint8_t *, bool);
-		using load_t = void (*)(YS_PlayerHandle, const uint8_t *);
-
-		using set_bpm_t = void (*)(YS_PlayerHandle, uint8_t);
-		using set_sample_rate_t = void (*)(YS_PlayerHandle, uint32_t);
-
-		using set_parameter_t = void (*)(YS_PlayerHandle, const char *, float);
-		using get_parameter_t = float (*)(YS_PlayerHandle, const char *);
-		using get_parameters_t = void (*)(YS_PlayerHandle, const char **);
-		using get_parameter_count_t = uint8_t (*)(YS_PlayerHandle);
-
-		using render_graphics_t = void (*)(YS_PlayerHandle);
-
-		using reset_t = void (*)(YS_PlayerHandle);
-
-		using get_id_t = const char *(*)(YS_PlayerHandle);
-
-		note_on_t note_on = nullptr;
-		note_off_t note_off = nullptr;
-
-		render_t render = nullptr;
-
-		store_calc_size_t store_calc_size = nullptr;
-		store_t store = nullptr;
-		load_t load = nullptr;
-
-		set_bpm_t set_bpm = nullptr;
-		set_sample_rate_t set_sample_rate = nullptr;
-
-		set_parameter_t set_parameter = nullptr;
-		get_parameter_t get_parameter = nullptr;
-		get_parameters_t get_parameters = nullptr;
-		get_parameter_count_t get_parameter_count = nullptr;
-
-		render_graphics_t render_graphics = nullptr;
-
-		reset_t reset = nullptr;
-
-		get_id_t get_id = nullptr;
-	};
 
 	class Player {
 	public:
@@ -117,7 +69,7 @@ namespace YourSound {
 
 	class PlayerInterface : public Player {
 	public:
-		PlayerInterface(YS_PlayerHandle player_handle, const std::filesystem::path &dll_path);
+		PlayerInterface(YS_PlayerHandle player_handle, std::filesystem::path dll_path);
 		~PlayerInterface() override = default;
 
 		void note_on(uint8_t midi_note_number, float velocity) override;
@@ -143,6 +95,54 @@ namespace YourSound {
 
 		[[nodiscard]] const char *get_id() override;
 	private:
+		struct s_PlayerAPI {
+			typedef void (*note_on_t)(YS_PlayerHandle, uint8_t, float);
+			typedef void (*note_off_t)(YS_PlayerHandle, uint8_t);
+
+			typedef void (*render_t)(YS_PlayerHandle, float *, uint16_t);
+
+			typedef uint64_t (*store_calc_size_t)(YS_PlayerHandle, bool);
+			typedef void (*store_t)(YS_PlayerHandle, uint8_t *, bool);
+			typedef void (*load_t)(YS_PlayerHandle, const uint8_t *);
+
+			typedef void (*set_bpm_t)(YS_PlayerHandle, uint8_t);
+			typedef void (*set_sample_rate_t)(YS_PlayerHandle, uint32_t);
+
+			typedef void (*set_parameter_t)(YS_PlayerHandle, const char *, float);
+			typedef float (*get_parameter_t)(YS_PlayerHandle, const char *);
+			typedef void (*get_parameters_t)(YS_PlayerHandle, const char **);
+			typedef uint8_t (*get_parameter_count_t)(YS_PlayerHandle);
+
+			typedef void (*render_graphics_t)(YS_PlayerHandle);
+
+			typedef void (*reset_t)(YS_PlayerHandle);
+
+			typedef const char *(*get_id_t)(YS_PlayerHandle);
+
+			note_on_t note_on = nullptr;
+			note_off_t note_off = nullptr;
+
+			render_t render = nullptr;
+
+			store_calc_size_t store_calc_size = nullptr;
+			store_t store = nullptr;
+			load_t load = nullptr;
+
+			set_bpm_t set_bpm = nullptr;
+			set_sample_rate_t set_sample_rate = nullptr;
+
+			set_parameter_t set_parameter = nullptr;
+			get_parameter_t get_parameter = nullptr;
+			get_parameters_t get_parameters = nullptr;
+			get_parameter_count_t get_parameter_count = nullptr;
+
+			render_graphics_t render_graphics = nullptr;
+
+			reset_t reset = nullptr;
+
+			get_id_t get_id = nullptr;
+		};
+
 		template <typename Func> Func p_get_dll_func(const char *name) const {
 			static_assert(std::is_pointer_v<Func>, "Func must be a function pointer");
 
@@ -164,7 +164,7 @@ namespace YourSound {
 
 		YS_PlayerHandle m_player_handle;
 		const std::filesystem::path m_dll_path;
-		PlayerAPI m_player_api;
+		s_PlayerAPI m_player_api;
 
 		friend YS_API void free_binary_player(const PlayerInterface *binary_player);
 	};
@@ -174,7 +174,7 @@ namespace YourSound {
 	};
 
 	[[nodiscard]] YS_API PlayerInterface *load_binary_player(const std::filesystem::path &dll_path,
-																			   const std::string &player_id);
+															 const std::string &player_id);
 	[[nodiscard]] YS_API Player *load_player_by_id(const std::string &player_id);
 	[[nodiscard]] YS_API PlayerWrapper *load_player_wrapper_by_id(const std::string &player_id);
 } // namespace YourSound

@@ -1,210 +1,168 @@
+#include "Audio.hpp"
+#include "Edit.hpp"
+#include "Image.hpp"
 #include "MessageBox.hpp"
+#include "Renderer.hpp"
 
-#include <YourSound/Player.hpp>
+#include <YourSound/BinPlayerSTD.hpp>
 #include <YourSound/UI/Fonts.hpp>
+#include <YourSound/Version.hpp>
 
-#include <ImGuiPianoKeyboard.hpp>
-#include <SDL3/SDL.h>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
-#include <imgui_stdlib.h>
 
-#include <filesystem>
-#include <mutex>
 #include <stacktrace>
 
-#include "YourSound/BinPlayerRegistry.hpp"
+enum class QSState : uint8_t { WELCOME, EDIT };
 
-ImFont *font_bold;
-ImFont *font_light;
-ImFont *font_heading;
+auto state = QSState::WELCOME;
+bool show_as_window = false;
 
-SDL_Renderer *renderer;
+void intro_window() {
+	ImGui::SetNextWindowPos({0.f, 80.f});
+	ImGui::SetNextWindowSize({1280.f, 720.f});
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, {0.05f, 0.05f, 0.05f, 1.f});
+	ImGui::Begin("Welcome", nullptr,
+				 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+					 ImGuiWindowFlags_NoScrollWithMouse);
+	ImGui::PopStyleColor();
 
-bool run_main_loop = true;
-bool bin_player_loading = true;
-bool chosen_dll = false;
+	{
+		static SDL_Texture *texture_qsamp_title_bg = nullptr;
 
-std::filesystem::path binplayer_dll_path;
+		if (!texture_qsamp_title_bg)
+			load_texture_from_file(YourSound::get_current_exe_directory() / "img/qsamp-title-bg.png", g_renderer,
+								   &texture_qsamp_title_bg, nullptr, nullptr);
 
-constexpr uint16_t BUFFER_SIZE = 2048;
-constexpr uint32_t SAMPLE_RATE = 3200;
-
-constexpr SDL_AudioSpec AUDIO_SPEC = {SDL_AUDIO_F32, 2, SAMPLE_RATE};
-
-auto keys_pressed = new bool[128]{};
-auto *output_buffer = new float[BUFFER_SIZE * 2];
-int32_t prev_note_active = -1;
-
-YourSound::Player *bin_player = nullptr;
-YourSound::Player **bin_player_ref = &bin_player;
-
-std::mutex bin_player_mutex;
-
-bool piano_callback(void *data, const int message, const int key, const float velocity) {
-	if (key >= 128) return false;
-	if (message == NoteGetStatus) return keys_pressed[key];
-
-	if (message == NoteOn) {
-		keys_pressed[key] = true;
-		static_cast<YourSound::Player *>(data)->note_on(key, velocity);
+		ImGui::SetCursorPos({0.f, 0.f});
+		ImGui::Image(texture_qsamp_title_bg, {1280.f, 720.f});
 	}
 
-	if (message == NoteOff) {
-		keys_pressed[key] = false;
-		static_cast<YourSound::Player *>(data)->note_off(key);
+	{
+		static SDL_Texture *texture_qsamp96 = nullptr;
+
+		if (!texture_qsamp96)
+			load_texture_from_file(YourSound::get_current_exe_directory() / "img/qsamp96.png", g_renderer,
+								   &texture_qsamp96, nullptr, nullptr);
+
+		static float title_height = 0.f;
+
+		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 100.f);
+		ImGui::SetCursorPosY((720.f - title_height) / 2.f);
+		ImGui::BeginGroup();
+		ImGui::Image(texture_qsamp96, {96.f, 96.f});
+
+		ImGui::SameLine();
+
+		ImGui::PushFont(YourSound::UI::get_font(ysbp_ui_FONT_BOLD_LARGE));
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (96.f - 64.f) / 2.f);
+		ImGui::Text("QuickSample");
+		ImGui::PopFont();
+		ImGui::EndGroup();
+
+		title_height = ImGui::GetItemRectSize().y;
 	}
 
-	return false;
+	{
+		static float options_height = 0.f;
+		static float options_width = 0.f;
+
+		ImGui::SetCursorPosX(1280.f - options_width - 175.f);
+		ImGui::SetCursorPosY((720.f - options_height) / 2.f);
+		ImGui::BeginGroup();
+		const ImVec2 rf_title_cursor_pos = ImGui::GetCursorScreenPos();
+		ImGui::Text("Options");
+		ImGui::GetWindowDrawList()->AddLineH(rf_title_cursor_pos.x,
+											 rf_title_cursor_pos.x + ImGui::GetItemRectSize().x - 1.f,
+											 rf_title_cursor_pos.y + ImGui::GetItemRectSize().y - 1.f, 0xFF999999);
+		ImGui::Indent();
+		ImGui::TextLink("Open Project");
+		if (ImGui::TextLink("New Project")) state = QSState::EDIT;
+		ImGui::TextLinkOpenURL("Manual",
+							   "https://fast.yoursoftware.org/org.yoursoftware/YourSound/QuickSample-Manual.pdf");
+		ImGui::EndGroup();
+
+		options_height = ImGui::GetItemRectSize().y;
+		options_width = ImGui::GetItemRectSize().x;
+	}
+
+	{
+		static float version_height = 0.f;
+
+		ImGui::SetCursorPos({5.f, 720.f - version_height - 5.f});
+		ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(50, 50, 50, 255));
+		ImGui::Text("QuickSample 1.0.0 for YourSound %s, BPI Version %u", YS_VERSION_STRING, YS_BPI_VERSION);
+		ImGui::PopStyleColor();
+		version_height = ImGui::GetItemRectSize().y;
+	}
+
+	ImGui::End();
 }
 
-void yoursound_error_callback(const char *message) {
-	std::stacktrace backtrace = std::stacktrace::current();
-	std::ostringstream backtrace_string;
-
-	backtrace_string << backtrace;
-
-	const std::string final_message = "--- YSBP Error Callback ---\n\n" + std::string(message) +
-									  "\n\nThe backtrace is shown below:\n" + backtrace_string.str();
-
-	// For testing libraries: keep a breakpoint set here so if any errors occur, we can easily debug them.
-	show_error(final_message);
-}
-
-static void SDLCALL callback_dll(void *userdata, const char *const *filelist, int filter) {
-	if (!filelist) {
-		show_error(SDL_GetError());
-		return;
-	}
-	if (!*filelist) return;
-
-	binplayer_dll_path = *filelist;
-
-	chosen_dll = true;
-
-	YourSound::BinPlayer::set_error_func(yoursound_error_callback);
-	YourSound::BinPlayer::register_player("org.yoursoftware.sound.hexwave", [] {
-		return YourSound::load_binary_player(binplayer_dll_path, "org.yoursoftware.sound.hexwave");
-	});
-
-	try {
-		bin_player = YourSound::load_player_by_id("org.yoursoftware.sound.hexwave");
-		bin_player_ref = &bin_player;
-
-		bin_player->set_bpm(120);
-		bin_player->set_sample_rate(SAMPLE_RATE);
-		bin_player->reset();
-
-		bin_player_loading = false;
-	} catch (std::exception &e) {
-		show_error(e.what());
-		std::exit(1);
+void main_loop() {
+	if (show_as_window) { show_as_window = audio_setup_window(false); }
+	audio_meter_window();
+	switch (state) {
+	case QSState::WELCOME: intro_window(); break;
+	case QSState::EDIT: edit_window(); break;
+	default: break;
 	}
 }
 
-void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, const int additional_amount, int total_amount) {
-	if (bin_player_loading) return;
-	if (additional_amount < 1) return;
-
-	std::lock_guard bin_player_lock(bin_player_mutex);
-
-	const auto player = *static_cast<YourSound::Player **>(userdata);
-	player->render(output_buffer, additional_amount / (sizeof(float) * 2));
-
-	SDL_PutAudioStreamData(stream, output_buffer, additional_amount);
-}
-
-int main(int argv, char *argc[]) {
-	std::set_terminate([] {
-		show_error("Unhandled exception.");
-		std::exit(1);
-	});
-
-	if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
-		show_error(SDL_GetError());
-		return 1;
-	}
+void init() {
+	YS_RUNTIME_ASSERT(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO), std::runtime_error, "SDL failed to initialise");
 
 	const float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-	constexpr SDL_WindowFlags window_flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_BORDERLESS;
-	SDL_Window *window = SDL_CreateWindow("YourSound QuickSample", static_cast<int>(1280 * main_scale),
-										  static_cast<int>(720 * main_scale), window_flags);
-	if (window == nullptr) {
-		show_error(SDL_GetError());
-		return 1;
-	}
 
-	renderer = SDL_CreateRenderer(window, nullptr);
-	SDL_SetRenderVSync(renderer, 1);
-	if (renderer == nullptr) {
-		show_error(SDL_GetError());
-		return 1;
-	}
+	constexpr SDL_WindowFlags window_flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	g_window = SDL_CreateWindow("YourSound QuickSample", static_cast<int>(1280 * main_scale),
+								static_cast<int>(800 * main_scale), window_flags);
 
-	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_ShowWindow(window);
+	YS_RUNTIME_ASSERT(g_window, std::runtime_error, std::format("Failed to create window:\n{}", SDL_GetError()));
+
+	g_renderer = SDL_CreateRenderer(g_window, nullptr);
+	SDL_SetRenderVSync(g_renderer, true);
+
+	YS_RUNTIME_ASSERT(g_renderer, std::runtime_error,
+					  std::format("Failed to create SDL renderer:\n{}", SDL_GetError()));
+
+	SDL_SetWindowPosition(g_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_ShowWindow(g_window);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+
 	ImGuiIO &io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.IniFilename = nullptr;
 
 	ImGuiStyle &style = ImGui::GetStyle();
+	ImGui::StyleColorsDark();
+
+	style.FontSizeBase = 20.f;
+	style.Alpha = 1.f;
+
 	style.ScaleAllSizes(main_scale);
 	style.FontScaleDpi = main_scale;
 
-	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
-	ImGui_ImplSDLRenderer3_Init(renderer);
-
-	style.FontSizeBase = 20.0f;
-	io.Fonts->AddFontFromFileTTF("font/FiraSans-Regular.ttf");
-	font_bold = io.Fonts->AddFontFromFileTTF("font/FiraSans-Bold.ttf");
-	font_light = io.Fonts->AddFontFromFileTTF("font/FiraSans-Light.ttf");
-	font_heading = io.Fonts->AddFontFromFileTTF("font/FiraSans-Bold.ttf", style.FontSizeBase * 1.75f);
 	YourSound::UI::imgui_load_fonts(io);
-	io.Fonts->Build();
 
-	ImGui::StyleColorsDark();
-	style.Colors[ImGuiCol_WindowBg].w = 1.f;
+	ImGui_ImplSDL3_InitForSDLRenderer(g_window, g_renderer);
+	ImGui_ImplSDLRenderer3_Init(g_renderer);
 
-	io.IniFilename = nullptr;
+	YourSound::UI::set_imgui_context(ImGui::GetCurrentContext());
 
-	std::string search_name;
-	std::string search_author;
-
-	constexpr ImGuiWindowFlags static_window_flags =
-		ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
-		ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoDocking;
-
-	constexpr SDL_DialogFileFilter yspp_filters[] = {{"YourSound Player Presets", "yspp"}, {"All Files", "*"}};
-	constexpr SDL_DialogFileFilter yssps_filters[] = {{"YourSound Sample Player Sample", "yssps"}, {"All Files", "*"}};
-
-	constexpr SDL_DialogFileFilter dll_filters[] = {{"Windows Dynamically-Linked Library", "dll"},
-													{"MacOS Dynamic Library", "dylib"},
-													{"Unix Shared Object", "so"},
-													{"All Files", "*"}};
-
-	SDL_ShowOpenFileDialog(callback_dll, nullptr, window, dll_filters, 4, nullptr, false);
-
-	const ImGuiViewport *viewport = ImGui::GetMainViewport();
-
-	SDL_AudioStream *audio_stream =
-		SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &AUDIO_SPEC, &audio_callback, bin_player_ref);
-
-	SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(audio_stream));
-
-	while (run_main_loop) {
+	show_as_window = true;
+	while (true) {
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			ImGui_ImplSDL3_ProcessEvent(&event);
-			if (event.type == SDL_EVENT_QUIT) run_main_loop = false;
-			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window))
-				run_main_loop = false;
+			if (event.type == SDL_EVENT_QUIT) return;
+			if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(g_window))
+				return;
 		}
 
-		if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
+		if (SDL_GetWindowFlags(g_window) & SDL_WINDOW_MINIMIZED) {
 			SDL_Delay(10);
 			continue;
 		}
@@ -213,70 +171,40 @@ int main(int argv, char *argc[]) {
 		ImGui_ImplSDL3_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::SetNextWindowPos(viewport->Pos);
-		ImGui::SetNextWindowSize(viewport->Size);
-		ImGui::SetNextWindowViewport(viewport->ID);
-
-		ImGui::Begin("YourSound QuickSample", &run_main_loop, static_window_flags);
-
-		static bool dragging = false;
-		static int offset_x = 0;
-		static int offset_y = 0;
-
-		float mouse_x, mouse_y;
-
-		if (const Uint32 buttons = SDL_GetGlobalMouseState(&mouse_x, &mouse_y);
-			buttons & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) {
-			if (!dragging) {
-				if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootWindow)) {
-
-					dragging = true;
-
-					int win_x, win_y;
-					SDL_GetWindowPosition(window, &win_x, &win_y);
-
-					offset_x = mouse_x - win_x;
-					offset_y = mouse_y - win_y;
-				}
-			} else SDL_SetWindowPosition(window, mouse_x - offset_x, mouse_y - offset_y);
-		} else dragging = false;
-
-		if (ImGui::BeginMenuBar()) {
-			if (ImGui::BeginMenu("File")) {
-				if (ImGui::MenuItem("New Project")) return 0;
-				if (ImGui::MenuItem("Save Samples")) return 0;
-				if (ImGui::MenuItem("Save Presets")) return 0;
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMenuBar();
-		}
-
-		ImGui::End();
-
-		ImGui::Begin("Sample Player");
-
-		if (!bin_player_loading) bin_player->render_graphics();
-		ImGui_PianoKeyboard("Piano", ImVec2(1024, 100), &prev_note_active, 21, 108, piano_callback, bin_player);
-
-		ImGui::End();
+		main_loop();
 
 		ImGui::Render();
-
-		SDL_SetRenderScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
-		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
-		SDL_RenderPresent(renderer);
+		SDL_SetRenderScale(g_renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+		SDL_SetRenderDrawColorFloat(g_renderer, 1.f, 0.f, 0.f, 1.f);
+		SDL_RenderClear(g_renderer);
+		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), g_renderer);
+		SDL_RenderPresent(g_renderer);
 	}
+}
 
-	ImGui_ImplSDLRenderer3_Shutdown();
-	ImGui_ImplSDL3_Shutdown();
-	ImGui::DestroyContext();
+int main(int argv, char *argc[]) {
+	try {
+		init();
 
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+		return 0;
+	} catch (std::exception &e) {
+		const std::source_location source_location = std::source_location::current();
+		const std::stacktrace stacktrace = std::stacktrace::current();
+		std::ostringstream stream;
 
-	return 0;
+		stream << stacktrace;
+
+		std::cerr << "An unhandled exception was caught at main.cpp:main\n"
+				  << e.what() << "\nStacktrace:\n"
+				  << stream.str() << std::endl;
+
+		std::cout << "Tip: Set a breakpoint at " << source_location.file_name() << "(" << source_location.line()
+				  << ") for better debugging." << std::endl;
+
+		show_error(std::format("An unexpected error occurred:\n\n{}\n\nThe program will now close.\nFor more "
+							   "information, check the Standard Error Stream.",
+							   e.what(), stream.str()));
+
+		return 1;
+	}
 }

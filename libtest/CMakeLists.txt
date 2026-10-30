@@ -8,11 +8,7 @@ target_sources(YSLibTest PRIVATE
 	src/MessageBox.cpp
 )
 
-target_include_directories(YSLibTest PRIVATE
-	include
-	../lib/SDL/include
-)
-
+target_include_directories(YSLibTest PRIVATE include)
 target_link_libraries(YSLibTest PRIVATE
 	ImGui_SDL3
 	YourSound
@@ -22,7 +18,7 @@ target_link_libraries(YSLibTest PRIVATE
 
 if(WIN32)
 	target_sources(YSLibTest PRIVATE app.rc)
-	add_target_resource(YSLibTest "YourSound Library Tester" "Test YourSound binary players.")
+	add_target_resource(YSLibTest "YourSound" "YourSound Binary Player Tester")
 endif()
 
 add_dependencies(YSLibTest YourSound YSKeyboardMappingHandler)

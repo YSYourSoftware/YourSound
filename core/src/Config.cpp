@@ -65,6 +65,25 @@ namespace YourSound {
 		return library_location / library_id / path;
 	}
 
+	std::filesystem::path get_current_exe_directory() {
+#ifdef __unix__
+		const std::filesystem::path exe = std::filesystem::canonical("/proc/self/exe");
+#elifdef _WIN32
+		const DWORD name_size = GetModuleFileNameA(nullptr, nullptr, 0);
+
+		std::string name;
+		name.resize(name_size + 1);
+
+		GetModuleFileNameA(nullptr, name.data(), name_size + 1);
+
+		const std::filesystem::path exe = name;
+#else
+		throw std::runtime_error("Unsupported OS");
+#endif
+
+		return exe.parent_path();
+	}
+
 	bool is_library_valid(const std::string &id) {
 		const std::filesystem::path library_location = get_library_location();
 

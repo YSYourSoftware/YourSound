@@ -28,5 +28,5 @@ target_sources(YSKeyboardMappingHandler PRIVATE
 )
 
 if(WIN32)
-	add_target_resource(YSKeyboardMappingHandler "YourSound Keyboard Mapping Handler" "Required to use MIDI keyboards with YourSound applications.")
+	add_target_resource(YSKeyboardMappingHandler "YourSound" "YourSound Keyboard Mapping Handler")
 endif()

@@ -1,7 +1,11 @@
 build/
 build-release/
 build-debug/
+
+build-plugin-debug/
+build-plugin-debug-opengl/
 build-plugin-release/
+
 */build/
 installer/win/temp/
 

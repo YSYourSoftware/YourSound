@@ -13,7 +13,7 @@ target_include_directories(YourSound PUBLIC
 )
 
 if(WIN32)
-	add_target_resource(YourSound "YourSound Core" "Required for all YourSound applications.")
+	add_target_resource(YourSound "YourSound" "YourSound Core")
 endif()
 
 find_package(PkgConfig REQUIRED)
@@ -29,7 +29,7 @@ endif()
 
 target_link_libraries(YourSound PUBLIC
 	nlohmann_json
-	SArc
+	SArcHelpers
 	PkgConfig::LuaJIT
 	sol2
 	PRIVATE

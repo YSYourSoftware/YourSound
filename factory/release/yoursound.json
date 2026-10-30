@@ -1,34 +1,52 @@
 {
 	"id": "org.yoursoftware.sound.factory",
+	"dependencies": [],
 	"name": "YourSound Factory Content",
 	"description": "Free and extensive sound library for YourSound.\nContains sampled instruments, synthesisers and more!",
-	"author": "YourSoftware",
+	"author": "YourSoftware Foundation",
 	"version": [1, 0, 0],
-	"playerVersionMin": [-1, -1, -1],
-	"playerVersionMax": [-1, -1, -1],
 	"binPlayersRequired": true,
 	"binPlayers": [
 		{
 			"id": "org.yoursoftware.sound.sampler",
-			"sharedLibraryKey": "all",
+			"sharedLibraryKey": "sampler",
 			"name": "Sample Player",
 			"frontFacing": true,
-			"actions": []
+			"actions": [],
+			"wrapper": false,
+			"rackSlots": 1
 		}, {
 			"id": "org.yoursoftware.sound.hexwave",
 			"sharedLibraryKey": "all",
 			"name": "HexWave Player",
-			"frontFacing": true
+			"frontFacing": true,
+			"actions": [],
+			"wrapper": false,
+			"rackSlots": 1
 		}, {
 			"id": "org.yoursoftware.sound.2a03",
 			"sharedLibraryKey": "all",
-			"name": "2A03 Player",
-			"frontFacing": true
+			"name": "2A03 Emulator",
+			"frontFacing": true,
+			"actions": [],
+			"wrapper": false,
+			"rackSlots": 1
 		}, {
 			"id": "org.yoursoftware.sound.wavetable",
 			"sharedLibraryKey": "all",
 			"name": "Wavetable Player",
-			"frontFacing": true
+			"frontFacing": true,
+			"actions": [],
+			"wrapper": false,
+			"rackSlots": 1
+		}, {
+			"id": "org.yoursoftware.sound.drum-controller",
+			"sharedLibraryKey": "all",
+			"name": "Drum Controller",
+			"frontFacing": true,
+			"actions": [],
+			"wrapper": true,
+			"rackSlots": 0
 		}
 	], "binPlayerCompat": [
 		"windows",

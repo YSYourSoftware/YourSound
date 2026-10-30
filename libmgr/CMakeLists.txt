@@ -2,26 +2,25 @@ add_executable(YSLibMgr WIN32 MACOSX_BUNDLE)
 
 target_compile_features(YSLibMgr PRIVATE cxx_std_23)
 
-add_subdirectory(src)
-
-target_include_directories(YSLibMgr PRIVATE
-	include
-	../lib/SDL/include
-	../lib/SArc/include
-)
-
+target_include_directories(YSLibMgr PRIVATE include)
 target_link_libraries(YSLibMgr PRIVATE
 	ImGui_SDL3
 	YourSound
-	SArc
+	SArcHelpers
 	nlohmann_json
+)
+
+target_sources(YSLibMgr PRIVATE
+	src/main.cpp
+	src/MessageBox.cpp
+	src/WinMain.cpp
 )
 
 target_compile_definitions(YSLibMgr PRIVATE $<$<CONFIG:Debug>:YSL_DEBUG>)
 
 if(WIN32)
 	target_sources(YSLibMgr PRIVATE app.rc)
-	add_target_resource(YSLibMgr "YourSound Library Manager" "Install and configure YourSound Libraries.")
+	add_target_resource(YSLibMgr "YourSound" "YourSound Library Manager")
 	target_link_options(YSLibMgr PRIVATE
 		"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 	)

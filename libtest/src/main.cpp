@@ -134,6 +134,11 @@ void yoursound_error_callback(const char *message) {
 	show_error(final_message);
 }
 
+bool yoursound_yesno_callback(const char *prompt, const char *message, const bool warning) {
+	if (warning) return ask_yesno_warning(prompt, message);
+	return ask_yesno_question(prompt, message);
+}
+
 void save_state(const bool store_reference, YourSound::Player *player) {
 	const char *player_id = player->get_id();
 
@@ -152,7 +157,7 @@ void save_state(const bool store_reference, YourSound::Player *player) {
 	delete[] buffer;
 }
 
-void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, const int additional_amount, int total_amount) {
+void SDLCALL audio_callback(void *, SDL_AudioStream *stream, const int additional_amount, int) {
 	if (bin_player_loading) return;
 	if (additional_amount < 1) return;
 
@@ -162,7 +167,6 @@ void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, const int a
 		const int chunk = std::min(frames, static_cast<int>(BUFFER_SIZE));
 
 		bin_player->render(output_buffer, chunk);
-
 		SDL_PutAudioStreamData(stream, output_buffer, chunk * 8);
 
 		frames -= chunk;
@@ -171,6 +175,7 @@ void SDLCALL audio_callback(void *userdata, SDL_AudioStream *stream, const int a
 
 int main(const int argc, char *argv[]) {
 	YourSound::BinPlayer::set_error_func(yoursound_error_callback);
+	YourSound::BinPlayer::set_yesno_func(yoursound_yesno_callback);
 
 	std::string PLAYER_ID;
 	std::filesystem::path SHARED_LIB;

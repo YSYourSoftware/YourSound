@@ -1,6 +1,7 @@
 #pragma once
 
 #include "YourSound/CoreExportImport.hpp"
+#include "YourSound/Player.hpp"
 
 #include <cstdint>
 
@@ -242,13 +243,47 @@ enum ysbp_ui_ImGuiStyleVar_ {
 	ysbp_ui_ImGuiStyleVar_COUNT
 };
 
+typedef int ysbp_ui_Direction;
+
+enum ysbp_ui_Direction_ {
+	ysbp_ui_Direction_Left,
+	ysbp_ui_Direction_Right,
+	ysbp_ui_Direction_Up,
+	ysbp_ui_Direction_Down,
+};
+
+typedef int ysbp_ui_ImGuiPopupFlags;
+
+enum ysbp_ui_ImGuiPopupFlags_ {
+	ysbp_ui_ImGuiPopupFlags_None = 0,
+	ysbp_ui_ImGuiPopupFlags_MouseButtonLeft = 1 << 2,
+	ysbp_ui_ImGuiPopupFlags_MouseButtonRight = 2 << 2,
+	ysbp_ui_ImGuiPopupFlags_MouseButtonMiddle = 3 << 2,
+	ysbp_ui_ImGuiPopupFlags_NoReopen = 1 << 5,
+	ysbp_ui_ImGuiPopupFlags_NoOpenOverExistingPopup = 1 << 7,
+	ysbp_ui_ImGuiPopupFlags_NoOpenOverItems = 1 << 8,
+	ysbp_ui_ImGuiPopupFlags_AnyPopupId = 1 << 10,
+	ysbp_ui_ImGuiPopupFlags_AnyPopupLevel = 1 << 11,
+	ysbp_ui_ImGuiPopupFlags_AnyPopup = ysbp_ui_ImGuiPopupFlags_AnyPopupId | ysbp_ui_ImGuiPopupFlags_AnyPopupLevel,
+};
+
+typedef int ysbp_ui_MouseButton;
+
+enum ysbp_ui_MouseButton_ {
+	ysbp_ui_MouseButton_Left = 0,
+	ysbp_ui_MouseButton_Right = 1,
+	ysbp_ui_MouseButton_Middle = 2
+};
+
 enum ysbp_ui_Font : uint8_t {
 	ysbp_ui_FONT_STANDARD_LARGE,
 	ysbp_ui_FONT_ICON,
 	ysbp_ui_FONT_ICON_LARGE,
 	ysbp_ui_FONT_MONO,
 	ysbp_ui_FONT_MONO_BOLD,
-	ysbp_ui_FONT_STANDARD_MEDIUM
+	ysbp_ui_FONT_STANDARD_MEDIUM,
+	ysbp_ui_FONT_BOLD,
+	ysbp_ui_FONT_BOLD_LARGE
 };
 
 typedef struct ysbp_ui_Vec2 {
@@ -259,12 +294,19 @@ typedef struct ysbp_ui_Vec4 {
 	float x, y, z, w;
 } ysbp_ui_Vec4;
 
+inline ysbp_ui_Vec2 operator-(const ysbp_ui_Vec2 a, const ysbp_ui_Vec2 b) {
+	return {a.x - b.x, a.y - b.y};
+}
+
+inline ysbp_ui_Vec2 operator+(const ysbp_ui_Vec2 a, const ysbp_ui_Vec2 b) {
+	return {a.x + b.x, a.y + b.y};
+}
+
 YS_BPI void ysbp_ui_begin_group();
 YS_BPI void ysbp_ui_end_group();
 
-YS_BPI void ysbp_ui_begin_child(const char *str_id, ysbp_ui_Vec2 size = {0, 0},
-										ysbp_ui_ImGuiChildFlags child_flags = 0,
-										ysbp_ui_ImGuiWindowFlags window_flags = 0);
+YS_BPI void ysbp_ui_begin_child(const char *str_id, ysbp_ui_Vec2 size = {0, 0}, ysbp_ui_ImGuiChildFlags child_flags = 0,
+								ysbp_ui_ImGuiWindowFlags window_flags = 0);
 YS_BPI void ysbp_ui_end_child();
 
 YS_BPI void ysbp_ui_same_line();
@@ -276,27 +318,26 @@ YS_BPI bool ysbp_ui_is_hovering();
 
 YS_BPI void ysbp_ui_text(const char *string);
 YS_BPI bool ysbp_ui_button(const char *label, ysbp_ui_Vec2 size = {0, 0});
+YS_BPI void ysbp_ui_player_embed_widget(YS_PlayerHandle *player, bool *popup_open, bool replaceable = true);
+YS_BPI bool ysbp_ui_arrow_button(const char *label, ysbp_ui_Direction direction);
 
 YS_BPI bool ysbp_ui_checkbox(const char *label, bool *value);
 YS_BPI bool ysbp_ui_knob(const char *label, float *p_value, float v_min, float v_max, float speed = 0,
-								 const char *format = "%.3f",
-								 ysbp_ui_ImGuiKnobVariant variant = ysbp_ui_ImGuiKnobVariant_Tick, float size = 0,
-								 ysbp_ui_ImGuiKnobFlags flags = 0, int steps = 10, float angle_min = -1,
-								 float angle_max = -1);
-YS_BPI bool ysbp_ui_float_slider(const char *label, float *v, float v_min, float v_max,
-										 const char *format = "%.3f", ysbp_ui_ImGuiSliderFlags flags = 0);
-YS_BPI bool ysbp_ui_float_slider_vertical(const char *label, ysbp_ui_Vec2 size, float *v, float v_min,
-												  float v_max, const char *format = "%.3f",
-												  ysbp_ui_ImGuiSliderFlags flags = 0);
+						 const char *format = "%.3f", ysbp_ui_ImGuiKnobVariant variant = ysbp_ui_ImGuiKnobVariant_Tick,
+						 float size = 0, ysbp_ui_ImGuiKnobFlags flags = 0, int steps = 10, float angle_min = -1,
+						 float angle_max = -1);
+YS_BPI bool ysbp_ui_float_slider(const char *label, float *v, float v_min, float v_max, const char *format = "%.3f",
+								 ysbp_ui_ImGuiSliderFlags flags = 0);
+YS_BPI bool ysbp_ui_float_slider_vertical(const char *label, ysbp_ui_Vec2 size, float *v, float v_min, float v_max,
+										  const char *format = "%.3f", ysbp_ui_ImGuiSliderFlags flags = 0);
 YS_BPI bool ysbp_ui_float_drag(const char *label, float *v, float v_speed, float v_min, float v_max,
-									   const char *format = "%.3f", ysbp_ui_ImGuiSliderFlags flags = 0);
+							   const char *format = "%.3f", ysbp_ui_ImGuiSliderFlags flags = 0);
 YS_BPI bool ysbp_ui_int_slider(const char *label, int *v, int v_min, int v_max, const char *format = "%d",
-									   ysbp_ui_ImGuiSliderFlags flags = 0);
-YS_BPI bool ysbp_ui_int_drag(const char *label, int *v, int v_speed, int v_min, int v_max,
-									 const char *format = "%d", ysbp_ui_ImGuiSliderFlags flags = 0);
+							   ysbp_ui_ImGuiSliderFlags flags = 0);
+YS_BPI bool ysbp_ui_int_drag(const char *label, int *v, int v_speed, int v_min, int v_max, const char *format = "%d",
+							 ysbp_ui_ImGuiSliderFlags flags = 0);
 
-YS_BPI bool ysbp_ui_begin_combo(const char *label, const char *preview_value,
-										ysbp_ui_ImGuiComboFlags flags = 0);
+YS_BPI bool ysbp_ui_begin_combo(const char *label, const char *preview_value, ysbp_ui_ImGuiComboFlags flags = 0);
 YS_BPI bool ysbp_ui_combo_selectable(const char *label, bool selected, ysbp_ui_ImGuiSelectableFlags flags = 0);
 YS_BPI void ysbp_ui_combo_set_default_item_focus();
 YS_BPI void ysbp_ui_end_combo();
@@ -311,19 +352,40 @@ YS_BPI void ysbp_ui_push_font(ysbp_ui_Font font);
 YS_BPI void ysbp_ui_pop_font();
 
 YS_BPI void ysbp_ui_line_graph_data(const char *label, const float *values, int values_count, int values_offset,
-											const char *overlay_text, float scale_min, float scale_max,
-											ysbp_ui_Vec2 graph_size, int stride);
+									const char *overlay_text, float scale_min, float scale_max, ysbp_ui_Vec2 graph_size,
+									int stride);
 
 YS_BPI void ysbp_ui_line_graph(const char *label, float (*values_getter)(void *data, int idx), void *data,
-									   int values_count, int values_offset, const char *overlay_text, float scale_min,
-									   float scale_max, ysbp_ui_Vec2 graph_size);
+							   int values_count, int values_offset, const char *overlay_text, float scale_min,
+							   float scale_max, ysbp_ui_Vec2 graph_size);
 
 YS_BPI void ysbp_ui_set_next_item_width(float width);
 
 YS_BPI ysbp_ui_Vec2 ysbp_ui_get_item_spacing();
+YS_BPI ysbp_ui_Vec2 ysbp_ui_get_frame_padding();
+YS_BPI void ysbp_ui_set_frame_padding(ysbp_ui_Vec2 value);
 YS_BPI float ysbp_ui_get_frame_height();
 
 YS_BPI void ysbp_ui_spacing();
+YS_BPI void ysbp_ui_separator();
+
+YS_BPI void ysbp_ui_open_popup(const char *id, ysbp_ui_ImGuiPopupFlags flags = 0);
+YS_BPI bool ysbp_ui_begin_popup(const char *id, ysbp_ui_ImGuiWindowFlags flags = 0);
+YS_BPI bool ysbp_ui_begin_modal_popup(const char *id, bool *open = nullptr, ysbp_ui_ImGuiWindowFlags flags = 0);
+YS_BPI void ysbp_ui_end_popup();
+
+YS_BPI bool ysbp_ui_begin_menu(const char *label, bool enabled = true);
+YS_BPI void ysbp_ui_end_menu();
+
+YS_BPI bool ysbp_ui_menu_item(const char *label, const char *shortcut = nullptr, bool selected = false,
+							  bool enabled = true);
+
+YS_BPI ysbp_ui_Vec2 ysbp_ui_get_mouse_pos();
+YS_BPI ysbp_ui_Vec2 ysbp_ui_get_cursor_pos();
+
+YS_BPI void ysbp_ui_draw_line(ysbp_ui_Vec2 start, ysbp_ui_Vec2 end, ysbp_ui_Vec4 colour, float thickness = 1.f);
+
+YS_BPI bool ysbp_ui_is_mouse_down(ysbp_ui_MouseButton button);
 
 namespace YourSound::UI {
 	YS_API void set_imgui_context(void *im_context);

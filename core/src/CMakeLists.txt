@@ -1,4 +1,6 @@
 target_sources(YourSound PRIVATE
+	IntegratedLoaders/BinLoaderSArcCompression.cpp
+
 	IntegratedPlayers/BasicOSCPlayer.cpp
 	IntegratedPlayers/LuaPlayers.cpp
 	IntegratedPlayers/ModLFO.cpp
@@ -8,5 +10,4 @@ target_sources(YourSound PRIVATE
 	BinPlayerInterface.cpp
 	Config.cpp
 	Player.cpp
-	Rack.cpp
 )

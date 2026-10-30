@@ -8,6 +8,7 @@
 [submodule "lib/SArc"]
 	path = lib/SArc
 	url = https://github.com/YSYourSoftware/SArc.git
+	branch = just-helpers
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
@@ -27,9 +28,6 @@
 [submodule "lib/sol2"]
 	path = lib/sol2
 	url = https://github.com/ThePhD/sol2.git
-[submodule "lib/freetype"]
-	path = lib/freetype
-	url = https://gitlab.freedesktop.org/freetype/freetype.git
 [submodule "lib/rtmidi"]
 	path = lib/rtmidi
 	url = https://github.com/thestk/rtmidi.git
@@ -39,3 +37,15 @@
 [submodule "lib/clap-helpers"]
 	path = lib/clap-helpers
 	url = https://github.com/free-audio/clap-helpers.git
+[submodule "lib/clap-imgui-support"]
+	path = lib/clap-imgui-support
+	url = https://github.com/YSYourSoftware/clap-imgui-support.git
+[submodule "factory/binary/lib/dr_libs"]
+	path = factory/binary/lib/dr_libs
+	url = https://github.com/mackron/dr_libs.git
+[submodule "lib/imgui-command-palette"]
+	path = lib/imgui-command-palette
+	url = https://github.com/hnOsmium0001/imgui-command-palette.git
+[submodule "lib/CLI11"]
+	path = lib/CLI11
+	url = https://github.com/CLIUtils/CLI11.git

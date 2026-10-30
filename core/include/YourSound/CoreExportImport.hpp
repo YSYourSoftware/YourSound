@@ -1,22 +1,27 @@
 #pragma once
 
-#ifdef YS_IN_CORE_BUILD
-#ifdef _WIN32
-#define YS_BPI extern "C" __declspec(dllexport)
+#if defined(_WIN32)
+
+#if defined(YS_IN_CORE_BUILD)
 #define YS_API __declspec(dllexport)
-#elifdef __GNUC__
-#define YS_BPI extern "C" __attribute__((visibility("default")))
+#else
+#define YS_API __declspec(dllimport)
+#endif
+
+#elif defined(__GNUC__) || defined(__clang__)
+
+#if defined(YS_IN_CORE_BUILD)
 #define YS_API __attribute__((visibility("default")))
 #else
-#define YS_BPI extern "C"
 #define YS_API
 #endif
+
 #else
-#ifdef _WIN32
-#define YS_BPI extern "C" __declspec(dllimport)
-#define YS_API __declspec(dllimport)
-#else
-#define YS_BPI extern "C"
+
+#warning "This compiler may not support DLL/SO/DYLIB imports & exports."
 #define YS_API
+
 #endif
-#endif
+
+#define YS_BPI extern "C" __cdecl YS_API
+#define YS_BLI YS_BPI

@@ -1,86 +1,43 @@
 #pragma once
 
-#include "YourSound/BinPlayerRegistry.hpp"
 #include "YourSound/BinPlayerSTD.hpp"
-#include "YourSound/Config.hpp"
-#include "YourSound/Rack.hpp"
 
-YS_BPI void ysbp_rack_add_player(YS_RackHandle rack, YS_PlayerHandle player);
-YS_BPI void ysbp_rack_wrap_player(YS_RackHandle rack, YS_PlayerHandle player, YS_PlayerWrapperHandle wrapper);
-
-YS_BPI inline void ysbp_player_note_on(YS_PlayerHandle player, const uint8_t midi_note_number, float velocity) {
-	static_cast<YourSound::Player *>(player)->note_on(midi_note_number, velocity);
+extern "C" {
+typedef void(__cdecl *ysbp_resource_load_callback_t)(const uint8_t *, size_t);
+typedef void(__cdecl *ysbp_resource_store_callback_t)(uint8_t *, size_t);
 }
 
-YS_BPI inline void ysbp_player_note_off(YS_PlayerHandle player, const uint8_t midi_note_number) {
-	static_cast<YourSound::Player *>(player)->note_off(midi_note_number);
-}
+YS_BPI void ysbp_player_note_on(YS_PlayerHandle player, uint8_t midi_note_number, float velocity);
+YS_BPI void ysbp_player_note_off(YS_PlayerHandle player, uint8_t midi_note_number);
 
-YS_BPI inline void ysbp_player_render(YS_PlayerHandle player, float *output_buffer,
-											  const uint16_t number_samples) {
-	static_cast<YourSound::Player *>(player)->render(output_buffer, number_samples);
-}
+YS_BPI void ysbp_player_render(YS_PlayerHandle player, float *output_buffer, uint16_t number_samples);
 
-YS_BPI inline uint64_t ysbp_player_store_calc_size(YS_PlayerHandle player, const bool store_reference) {
-	return static_cast<YourSound::Player *>(player)->store_calc_size(store_reference);
-}
+YS_BPI uint64_t ysbp_player_store_calc_size(YS_PlayerHandle player, bool store_reference);
+YS_BPI void ysbp_player_store(YS_PlayerHandle player, uint8_t *output_buffer, bool store_reference);
+YS_BPI void ysbp_player_load(YS_PlayerHandle player, const uint8_t *input_buffer);
 
-YS_BPI inline void ysbp_player_store(YS_PlayerHandle player, uint8_t *output_buffer,
-											 const bool store_reference) {
-	static_cast<YourSound::Player *>(player)->store(output_buffer, store_reference);
-}
+YS_BPI void ysbp_player_set_bpm(YS_PlayerHandle player, uint16_t value);
+YS_BPI void ysbp_player_set_sample_rate(YS_PlayerHandle player, uint32_t value);
 
-YS_BPI inline void ysbp_player_load(YS_PlayerHandle player, const uint8_t *input_buffer) {
-	static_cast<YourSound::Player *>(player)->load(input_buffer);
-}
+YS_BPI void ysbp_player_set_parameter(YS_PlayerHandle player, const char *param_id, float value);
+YS_BPI float ysbp_player_get_parameter(YS_PlayerHandle player, const char *param_id);
+YS_BPI void ysbp_player_get_parameters(YS_PlayerHandle player, const char **buffer);
+YS_BPI uint8_t ysbp_player_get_parameter_count(YS_PlayerHandle player);
 
-YS_BPI inline void ysbp_player_set_bpm(YS_PlayerHandle player, const uint16_t value) {
-	static_cast<YourSound::Player *>(player)->set_bpm(value);
-}
+YS_BPI void ysbp_player_render_graphics(YS_PlayerHandle player);
 
-YS_BPI inline void ysbp_player_set_sample_rate(YS_PlayerHandle player, const uint32_t value) {
-	static_cast<YourSound::Player *>(player)->set_sample_rate(value);
-}
+YS_BPI void ysbp_player_reset(YS_PlayerHandle player);
 
-YS_BPI inline void ysbp_player_set_parameter(YS_PlayerHandle player, const char *param_id, const float value) {
-	static_cast<YourSound::Player *>(player)->set_parameter(param_id, value);
-}
+YS_BPI const char *ysbp_player_get_id(YS_PlayerHandle player);
 
-YS_BPI inline float ysbp_player_get_parameter(YS_PlayerHandle player, const char *param_id) {
-	return static_cast<YourSound::Player *>(player)->get_parameter(param_id);
-}
+YS_BPI YS_PlayerHandle ysbp_create_bin_player(const char *id);
+YS_BPI void ysbp_destroy_bin_player(YS_PlayerHandle player);
 
-YS_BPI inline void ysbp_player_get_parameters(YS_PlayerHandle player, const char **buffer) {
-	static_cast<YourSound::Player *>(player)->get_parameters(buffer);
-}
+YS_BPI void ysbp_show_error(YourSound::ErrorSource source, const char *message);
 
-YS_BPI inline uint8_t ysbp_player_get_parameter_count(YS_PlayerHandle player) {
-	return static_cast<YourSound::Player *>(player)->get_parameter_count();
-}
+YS_BPI bool ysbp_ask_yesno(const char *main_prompt, const char *message, bool warning);
 
-YS_BPI inline void ysbp_player_render_graphics(YS_PlayerHandle player) {
-	static_cast<YourSound::Player *>(player)->render_graphics();
-}
-
-YS_BPI inline void ysbp_player_reset(YS_PlayerHandle player) {
-	static_cast<YourSound::Player *>(player)->reset();
-}
-
-YS_BPI inline const char *ysbp_player_get_id(YS_PlayerHandle player) {
-	return static_cast<YourSound::Player *>(player)->get_id();
-}
-
-YS_BPI inline void ysbp_destroy_bin_player(YS_PlayerHandle player) {
-	delete static_cast<YourSound::Player *>(player);
-}
-
-YS_BPI inline void ysbp_show_error(const YourSound::ErrorSource source, const char *message) {
-	const std::string final_message = std::string(message) + "\n\nDebug Information:\n\n" +
-									  std::string(source.file_name) + ":" + std::to_string(source.line_number) + "\n" +
-									  std::string(source.function_name);
-	YourSound::BinPlayer::g_error_func(final_message.c_str());
-}
-
-YS_BPI inline const char *ysbp_get_library_location() {
-	return reinterpret_cast<const char *>(YourSound::get_library_location().generic_u8string().c_str());
-}
+YS_BPI const char *ysbp_get_library_location();
+YS_BPI bool ysbp_load_resource(const char *location, ysbp_resource_load_callback_t load_callback);
+/*YS_BPI bool ysbp_store_resource(const char *location, const char *loader,
+								ysbp_resource_store_callback_t store_callback);*/

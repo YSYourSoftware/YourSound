@@ -5,8 +5,6 @@
 #include <imgui-knobs.h>
 #include <imgui.h>
 
-#include <cmath>
-
 extern "C" {
 void ysbp_ui_begin_group() { ImGui::BeginGroup(); }
 void ysbp_ui_end_group() { ImGui::EndGroup(); }
@@ -34,6 +32,26 @@ void ysbp_ui_align_cursor_for_center(const float width) {
 bool ysbp_ui_is_hovering() { return ImGui::IsItemHovered(); }
 void ysbp_ui_text(const char *string) { ImGui::Text(string); }
 bool ysbp_ui_button(const char *label, const ysbp_ui_Vec2 size) { return ImGui::Button(label, {size.x, size.y}); }
+
+void ysbp_ui_player_embed_widget(YS_PlayerHandle *player, bool *popup_open, const bool replaceable) {
+	if (ImGui::BeginPopupModal("Embedded Player View")) {
+		if (*player) static_cast<YourSound::Player *>(*player)->render_graphics();
+
+		ImGui::EndPopup();
+	}
+
+	ImGui::Text((*player) ? "%s" : "No Player Loaded",
+				(*player) ? static_cast<YourSound::Player *>(*player)->get_id() : "");
+
+	if (replaceable) {
+		ImGui::Button("Load Player");
+	}
+}
+
+bool ysbp_ui_arrow_button(const char *label, const ysbp_ui_Direction direction) {
+	return ImGui::ArrowButton(label, static_cast<ImGuiDir>(direction));
+}
+
 bool ysbp_ui_checkbox(const char *label, bool *value) { return ImGui::Checkbox(label, value); }
 bool ysbp_ui_knob(const char *label, float *p_value, const float v_min, const float v_max, const float speed,
 				  const char *format, const ysbp_ui_ImGuiKnobVariant variant, const float size,
@@ -99,6 +117,8 @@ void ysbp_ui_push_font(const ysbp_ui_Font font) {
 	case ysbp_ui_FONT_MONO: ImGui::PushFont(YourSound::UI::g_imgui_mono_font); break;
 	case ysbp_ui_FONT_MONO_BOLD: ImGui::PushFont(YourSound::UI::g_imgui_mono_font_bold); break;
 	case ysbp_ui_FONT_STANDARD_MEDIUM: ImGui::PushFont(YourSound::UI::g_imgui_standard_font_medium); break;
+	case ysbp_ui_FONT_BOLD: ImGui::PushFont(YourSound::UI::g_imgui_bold_font); break;
+	case ysbp_ui_FONT_BOLD_LARGE: ImGui::PushFont(YourSound::UI::g_imgui_bold_font_large); break;
 	}
 }
 
@@ -125,8 +145,48 @@ ysbp_ui_Vec2 ysbp_ui_get_item_spacing() {
 	return {item_spacing.x, item_spacing.y};
 }
 
+ysbp_ui_Vec2 ysbp_ui_get_frame_padding() {
+	const ImVec2 &frame_padding = ImGui::GetStyle().FramePadding;
+	return {frame_padding.x, frame_padding.y};
+}
+
+void ysbp_ui_set_frame_padding(ysbp_ui_Vec2 value) { ImGui::GetStyle().FramePadding = {value.x, value.y}; }
+
 float ysbp_ui_get_frame_height() { return ImGui::GetFrameHeight(); }
 void ysbp_ui_spacing() { ImGui::Spacing(); }
+void ysbp_ui_separator() { ImGui::Separator(); }
+
+void ysbp_ui_open_popup(const char *id, const ysbp_ui_ImGuiPopupFlags flags) { ImGui::OpenPopup(id, flags); }
+bool ysbp_ui_begin_popup(const char *id, const ysbp_ui_ImGuiWindowFlags flags) { return ImGui::BeginPopup(id, flags); }
+bool ysbp_ui_begin_modal_popup(const char *id, bool *open, const ysbp_ui_ImGuiWindowFlags flags) {
+	return ImGui::BeginPopupModal(id, open, flags);
+}
+
+void ysbp_ui_end_popup() { ImGui::EndPopup(); }
+
+bool ysbp_ui_begin_menu(const char *label, const bool enabled) { return ImGui::BeginMenu(label, enabled); }
+void ysbp_ui_end_menu() { ImGui::EndMenu(); }
+
+bool ysbp_ui_menu_item(const char *label, const char *shortcut, const bool selected, const bool enabled) {
+	return ImGui::MenuItem(label, shortcut, selected, enabled);
+}
+
+ysbp_ui_Vec2 ysbp_ui_get_mouse_pos() {
+	const ImVec2 mouse_pos = ImGui::GetMousePos();
+	return {mouse_pos.x, mouse_pos.y};
+}
+
+ysbp_ui_Vec2 ysbp_ui_get_cursor_pos() {
+	const ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+	return {cursor_pos.x, cursor_pos.y};
+}
+
+void ysbp_ui_draw_line(ysbp_ui_Vec2 start, ysbp_ui_Vec2 end, const ysbp_ui_Vec4 colour, const float thickness) {
+	ImDrawList *draw_list = ImGui::GetForegroundDrawList();
+	draw_list->AddLine({start.x, start.y}, {end.x, end.y}, IM_COL32(colour.x, colour.y, colour.z, colour.w), thickness);
+}
+
+bool ysbp_ui_is_mouse_down(const ysbp_ui_MouseButton button) { return ImGui::IsMouseDown(button); }
 }
 
 namespace YourSound::UI {

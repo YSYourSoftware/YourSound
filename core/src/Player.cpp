@@ -1,19 +1,19 @@
 #include "YourSound/Player.hpp"
 
-#include "YourSound/Rack.hpp"
+#include "YourSound/BinPlayerRegistry.hpp"
 #include "YourSound/Version.hpp"
 
 #include <SArc/Helpers.hpp>
 
-#include <exception>
 #include <iostream>
+#include <utility>
 
-#include "YourSound/BinPlayerRegistry.hpp"
+#define YS_LOAD_API_FN(api, name) api.name = p_get_dll_func<decltype(api.name)>("player_" #name)
 
 using namespace YourSound;
 
-PlayerInterface::PlayerInterface(YS_PlayerHandle player_handle, const std::filesystem::path &dll_path) :
-	m_player_handle(player_handle), m_dll_path(dll_path) {
+PlayerInterface::PlayerInterface(YS_PlayerHandle player_handle, std::filesystem::path dll_path) :
+	m_player_handle(player_handle), m_dll_path(std::move(dll_path)) {
 	YS_LOAD_API_FN(m_player_api, note_on);
 	YS_LOAD_API_FN(m_player_api, note_off);
 
@@ -81,14 +81,14 @@ void PlayerInterface::reset() { m_player_api.reset(m_player_handle); }
 const char *PlayerInterface::get_id() { return m_player_api.get_id(m_player_handle); }
 
 #ifdef _WIN32
-using get_api_version_fn = uint32_t (*)();
-using create_bin_player_fn = YS_RackHandle (*)(const char *);
-using destroy_bin_player_fn = void (*)(YS_RackHandle);
+typedef uint32_t (*get_api_version_t)();
+typedef YS_PlayerHandle (*create_bin_player_t)(const char *);
+typedef void (*destroy_bin_player_t)(YS_PlayerHandle);
 
 void YourSound::free_binary_player(const PlayerInterface *binary_player) {
 	const HMODULE dll = loaded_dlls[binary_player->m_dll_path];
 
-	const auto destroy_bin_player = reinterpret_cast<destroy_bin_player_fn>(GetProcAddress(dll, "destroy_bin_player"));
+	const auto destroy_bin_player = reinterpret_cast<destroy_bin_player_t>(GetProcAddress(dll, "destroy_bin_player"));
 	SARC_RUNTIME_ASSERT(destroy_bin_player, invalid_binary_player,
 						"destroy_bin_player not found in library: " + binary_player->m_dll_path.string());
 
@@ -106,19 +106,19 @@ PlayerInterface *YourSound::load_binary_player(const std::filesystem::path &dll_
 
 		loaded_dlls.insert({dll_path, dll});
 
-		const auto get_api_version = reinterpret_cast<get_api_version_fn>(GetProcAddress(dll, "get_api_version"));
+		const auto get_api_version = reinterpret_cast<get_api_version_t>(GetProcAddress(dll, "get_api_version"));
 		SARC_RUNTIME_ASSERT(get_api_version, invalid_binary_player,
 							"get_api_version not found in library: " + dll_path.string());
-		SARC_RUNTIME_ASSERT(get_api_version() == YS_API_VERSION, SArc::version_mismatch,
+		SARC_RUNTIME_ASSERT(get_api_version() == YS_BPI_VERSION, SArc::version_mismatch,
 							"Player API version mismatch in: " + dll_path.string() + " (expected " +
-								std::to_string(YS_API_VERSION) + ", got " + std::to_string(get_api_version()) + ")");
+								std::to_string(YS_BPI_VERSION) + ", got " + std::to_string(get_api_version()) + ")");
 	}
 
-	const auto create_bin_player = reinterpret_cast<create_bin_player_fn>(GetProcAddress(dll, "create_bin_player"));
+	const auto create_bin_player = reinterpret_cast<create_bin_player_t>(GetProcAddress(dll, "create_bin_player"));
 	SARC_RUNTIME_ASSERT(create_bin_player, invalid_binary_player,
 						"create_bin_player not found in library: " + dll_path.string());
 
-	YS_RackHandle bin_player = create_bin_player(player_id.c_str());
+	YS_PlayerHandle bin_player = create_bin_player(player_id.c_str());
 	SARC_RUNTIME_ASSERT(bin_player, player_not_found,
 						"Player " + player_id + " not found in library: " + dll_path.string());
 

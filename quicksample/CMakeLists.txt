@@ -1,19 +1,27 @@
 add_executable(YSQuickSample WIN32 MACOSX_BUNDLE)
 
 target_compile_features(YSQuickSample PRIVATE cxx_std_23)
-
-add_subdirectory(src)
-
 target_include_directories(YSQuickSample PRIVATE include)
-
 target_link_libraries(YSQuickSample PRIVATE
 	ImGui_SDL3
 	YourSound
+	YSKeyboardMappingHandler
+)
+
+target_sources(YSQuickSample PRIVATE
+	src/main.cpp
+
+	src/Audio.cpp
+	src/Edit.cpp
+	src/Image.cpp
+	src/MessageBox.cpp
+	src/SampleLZ4Serialiser.cpp
+	src/WinMain.cpp
 )
 
 if(WIN32)
 	target_sources(YSQuickSample PRIVATE app.rc)
-	add_target_resource(YSQuickSample "YourSound QuickSample" "Quickly sample real-life instruments into YourSound patches.")
+	add_target_resource(YSQuickSample "YourSound" "YourSound QuickSample")
 	target_link_options(YSQuickSample PRIVATE
 		"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 	)
@@ -25,7 +33,7 @@ if(APPLE)
 	target_sources(YSQuickSample PRIVATE icon.icns)
 endif()
 
-add_dependencies(YSQuickSample YourSound)
+add_dependencies(YSQuickSample YourSound YSKeyboardMappingHandler)
 add_custom_command(TARGET YSQuickSample POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 	$<TARGET_RUNTIME_DLLS:YSQuickSample>
