@@ -14,4 +14,6 @@ installer/win/temp/
 
 vcpkg_installed/
 
+scripts/__pycache__
+
 *.yslib
